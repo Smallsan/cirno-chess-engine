@@ -2,11 +2,8 @@
 use crate::types::{Chess, Move, ChessPieces, PieceColor};
 use crate::color::is_opponent_color;
 
-/**
- * Black works because of a hardcoded direction_offset equality.
- * White doesn't as a result of that.
- *
- * Double pawn pushes also don't work.
+/*
+ * Promotion left.
  */
 pub fn generate_pawn_moves(
     start_square: usize,
@@ -25,7 +22,7 @@ pub fn generate_pawn_moves(
         let target_piece = board.get(target_square as usize);
 
         if let Some(target_piece) = target_piece {
-            if direction_offset == -8 && target_piece.0 == ChessPieces::Empty {
+            if matches!(direction_offset, -8 | 8) && target_piece.0 == ChessPieces::Empty {
                 let movement = Move {
                     start_square: start_square as i16,
                     target_square,
@@ -34,8 +31,8 @@ pub fn generate_pawn_moves(
 
                 // Add double move for pawns from initial position
                 let initial_rank = match current_player_color {
-                    PieceColor::White => 6,
-                    PieceColor::Black => 1,
+                    PieceColor::White => 1,
+                    PieceColor::Black => 6,
                     _ => 0, // Placeholder
                 };
 
@@ -51,7 +48,7 @@ pub fn generate_pawn_moves(
                 }
             }
 
-            if direction_offset == -7 || direction_offset == -9 {
+            if matches!(direction_offset, -7 | 7 | -9 | 9) {
                 if is_opponent_color(&target_piece.1, current_player_color) {
                     let movement = Move {
                         start_square: start_square as i16,

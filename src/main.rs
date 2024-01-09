@@ -15,6 +15,13 @@
 //         white => black's response to that move => white's response to those moves
 //      3. 
 
+// Future issues:
+//
+// How do you "make" moves in this engine?
+// Our state is currently in a FEN string.
+//
+// We could have a Algebraic Notation => FEN converter.
+
 mod helpers;
 mod types;
 mod moves;
@@ -25,9 +32,7 @@ use crate::helpers::*;
 
 // TODO
 // Pawn Pieces
-//      - Fix Small's pawn piece thing :)
 //      - En Passant
-//      - Double Pawn Pushes
 //      - Promotions
 // King
 //      - Castling
@@ -38,13 +43,13 @@ fn main() {
         "r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1",
         "3k4/8/8/3p4/3P4/8/8/3K4",
         "8/8/4P3/1P2Q3/8/2P3N1/4N3/R7",
-        "8/8/8/3PP3/3pp3/8/8/8",
+        "rnbqkbnr/ppp1p1pp/3p4/5p2/4P3/3P4/PPP2PPP/RNBQKBNR",
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
-        "8/8/8/8/8/8/8/8"
+        "8/3K1R2/6B1/8/8/3r4/3k4/8"
     ];
 
     for fen in fens {
-        let mut chess_state = ChessState { color_to_move: PieceColor::Black, ..Default::default() };
+        let mut chess_state = ChessState { color_to_move: PieceColor::White, ..Default::default() };
         let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
         fen::load_position_from_fen(fen.to_string(), &mut chess_state.board);
