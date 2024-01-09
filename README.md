@@ -8,4 +8,4 @@ A programmer's first attempt at a full from scratch chess engine.
 - Small for helping me with goofy ahhh bugs and just being supportive.
 
 ### The Moment where it all started
-![image](https://github.com/DoormatIka/cirno-chess-engine/assets/68234036/46a4ba89-3bc4-4330-8fd7-72abc01d22c2)
+![image](https://github.com/DoormatIka/cirno-chess-engine/assets/68234036/ba03cadf-0532-4d92-82e0-d6d66d5a0413)
