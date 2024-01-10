@@ -1,14 +1,12 @@
 
 use std::collections::HashMap;
-use crate::types::{PieceColor, Chess, ChessPieces};
+use crate::types::{PieceColor, BoardPiece, ChessPieces};
 
 /**
  * Should be used once only due to it reversing the board array.
  */
-pub fn load_position_from_fen(fen: String, board: &mut [Chess; 64]) {
-    dbg!(&fen);
-    // https://youtu.be/U4ogK0MIzqk?si=rM_niVwj8yMTxsda&t=184
-    let piece_type_from_symbol: HashMap<char, Chess> = HashMap::from([
+pub fn load_position_from_fen(fen: String, board: &mut [BoardPiece; 64]) {
+    let piece_type_from_symbol: HashMap<char, BoardPiece> = HashMap::from([
         ('r', (ChessPieces::Rooks, PieceColor::Black)),
         ('n', (ChessPieces::Knights, PieceColor::Black)),
         ('b', (ChessPieces::Bishops, PieceColor::Black)),

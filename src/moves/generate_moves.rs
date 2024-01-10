@@ -4,7 +4,7 @@ use crate::types::SquaresToEdge;
 
 /**
  * Caching moves to save computation.
- * It returns the "amount of steps" a piece takes in order to reach the "edge" of the board
+ * It returns the "amount of steps" a piece takes in order to reach the "edge" of the board.
  */
 pub fn precompute_squares_to_edge() -> SquaresToEdge {
     let mut sq_to_edge = [[0; 8]; 64];

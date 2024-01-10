@@ -1,8 +1,8 @@
 
-use crate::types::{Chess, Move};
+use crate::types::{BoardPiece, Move};
 use crate::helpers::color::*;
 
-pub fn generate_knight_moves(start_square: usize, board: &[Chess; 64], moves: &mut Vec<Move>) {
+pub fn generate_knight_moves(start_square: usize, board: &[BoardPiece; 64], moves: &mut Vec<Move>, attacked_squares: &mut Vec<i16>) {
     let knight_moves = [
         (-1, -2), (-2, -1), (-2, 1), (-1, 2),
         (1, -2), (2, -1), (2, 1), (1, 2),
@@ -25,6 +25,7 @@ pub fn generate_knight_moves(start_square: usize, board: &[Chess; 64], moves: &m
             moves.push(movement);
 
             if is_opponent_color(&target_piece.1, &board[start_square].1) {
+                attacked_squares.push(target_square);
                 continue;
             }
         }

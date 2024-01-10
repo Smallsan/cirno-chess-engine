@@ -1,11 +1,11 @@
 
-use crate::types::{Chess, ChessPieces, Move};
+use crate::types::{BoardPiece, ChessPieces, Move};
 use crate::color::is_opponent_color;
 
 /**
  * King = Not done: Castling
  */
-pub fn generate_king_moves(start_square: usize, board: &[Chess; 64], moves: &mut Vec<Move>) {
+pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves: &mut Vec<Move>, attacked_squares: &mut Vec<i16>) {
     let king_moves = [
         (-1, -1), (-1, 0), (-1, 1), (0, -1),
         (0, 1), (1, -1), (1, 0), (1, 1),
@@ -21,14 +21,19 @@ pub fn generate_king_moves(start_square: usize, board: &[Chess; 64], moves: &mut
             let target_square = (new_rank * 8 + new_file) as i16;
             let target_piece = board[target_square as usize];
 
-            if target_piece.0 == ChessPieces::Empty
-                || is_opponent_color(&target_piece.1, &board[start_square].1)
-            {
-                let movement = Move {
-                    start_square: start_square as i16,
-                    target_square,
-                };
-                moves.push(movement);
+            if target_piece.0 == ChessPieces::Empty {
+                continue;
+            }
+
+            let movement = Move {
+                start_square: start_square as i16,
+                target_square,
+            };
+            moves.push(movement);
+
+            if is_opponent_color(&target_piece.1, &board[start_square].1) {
+                attacked_squares.push(target_square);
+                continue;
             }
         }
     }

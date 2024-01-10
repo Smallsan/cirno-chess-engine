@@ -1,5 +1,5 @@
 
-pub type Chess = (ChessPieces, PieceColor);
+pub type BoardPiece = (ChessPieces, PieceColor);
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum ChessPieces {
@@ -30,7 +30,7 @@ pub struct Move {
 }
 
 pub struct ChessState {
-    pub board: [Chess; 64],
+    pub board: [BoardPiece; 64],
     pub color_to_move: PieceColor,
 }
 
