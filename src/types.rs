@@ -32,6 +32,12 @@ pub struct Move {
 pub struct ChessState {
     pub board: [BoardPiece; 64],
     pub color_to_move: PieceColor,
+    pub is_able_to_castle: Castle,
+}
+
+pub struct Castle {
+    pub white: bool,
+    pub black: bool,
 }
 
 impl Default for ChessState {
@@ -39,6 +45,7 @@ impl Default for ChessState {
         ChessState {
             board: [(ChessPieces::Empty, PieceColor::None); 64],
             color_to_move: PieceColor::Black,
+            is_able_to_castle: Castle { white: true, black: true },
         }
     }
 }

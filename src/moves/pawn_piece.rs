@@ -46,7 +46,6 @@ pub fn generate_pawn_moves(
                         target_square: double_target_square,
                     };
                     moves.push(double_movement);
-                    attacked_squares.push(double_target_square);
                 }
             }
 

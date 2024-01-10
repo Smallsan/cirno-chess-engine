@@ -55,7 +55,6 @@ fn main() {
 
         let (friendly_movements, friendly_attacking) = generate_moves(&chess_state.board, &chess_state.color_to_move, &squares_to_edge);
         display::display_chess_tui(&chess_state, &friendly_movements, &friendly_attacking);
-        // println!("{}", format_attacking_squares(&chess_state.board, &friendly_attacking));
     }
 }
 
@@ -64,22 +63,20 @@ fn format_attacking_squares(board: &[BoardPiece; 64], enemy_attacking: &Vec<i16>
     for enemy_attack_index in enemy_attacking {
         let square = board[*enemy_attack_index as usize];
         dbg!(square, enemy_attack_index);
-        let mut piece_string = helpers::display::format_piece(square);
-        piece_string.insert_str(0, ", ");
+        let piece_string = helpers::display::format_piece(square);
         str += &piece_string;
+        str.insert_str(0, ", ");
     }
     str
 }
 
 /**
- * Generates available moves
+ * Generates available moves.
  */
 fn generate_moves(board: &[BoardPiece; 64], current_player_color: &PieceColor, sqs_to_edge: &SquaresToEdge) -> (Vec<Move>, Vec<i16>) {
     let mut moves = Vec::<Move>::new();
-    let mut attacked_squares = Vec::<i16>::new(); // new addition, it only gets the
-                                                  // attacked squares and not the square attacking
-                                                  // it.
-
+    let mut attacked_squares = Vec::<i16>::new(); // new addition, it only gets the attacked
+                                                  // squares and not the square attacking it.
     for start_square in 0..64 { 
         // we're currently just caching all moves that a piece can do in a vector
         // it scans every square for a piece

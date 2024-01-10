@@ -26,24 +26,20 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
                 continue;
             }
 
-            let movement = Move {
+            moves.push(Move {
                 start_square: start_square as i16,
                 target_square,
-            };
-            moves.push(movement);
+            });
 
-            dbg!(target_piece.1, board[start_square].1, start_square);
             if is_opponent_color(&target_piece.1, &board[start_square].1) {
-                let movement = Move {
-                    start_square: start_square as i16,
-                    target_square,
-                };
-                
                 if !attacked_squares.contains(&target_square) {
-                    moves.push(movement);
+                    moves.push(Move {
+                        start_square: start_square as i16,
+                        target_square,
+                    });
                     attacked_squares.push(target_square);
                 }
-        }
+            }
         }
     }
 }

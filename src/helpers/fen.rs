@@ -4,6 +4,8 @@ use crate::types::{PieceColor, BoardPiece, ChessPieces};
 
 /**
  * Should be used once only due to it reversing the board array.
+ *
+ * Doesn't support the entire FEN string yet. Castling doesn't work yet.
  */
 pub fn load_position_from_fen(fen: String, board: &mut [BoardPiece; 64]) {
     let piece_type_from_symbol: HashMap<char, BoardPiece> = HashMap::from([
