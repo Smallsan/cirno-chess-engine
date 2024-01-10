@@ -57,9 +57,12 @@ pub fn generate_pawn_moves(
                         start_square: start_square as i16,
                         target_square,
                     };
-                    moves.push(movement);
-                    attacked_squares.push(target_square);
-                }
+                    
+                    if !attacked_squares.contains(&target_square) {
+                        moves.push(movement);
+                        attacked_squares.push(target_square);
+                    }
+            }
             }
         }
     }
