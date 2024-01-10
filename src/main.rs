@@ -42,7 +42,9 @@ use crate::helpers::*;
 // Algebraic Notation for User Input
 fn main() {
     let fens = vec![
-        "8/8/8/4p3/3P4/5n2/8/8"
+        "8/8/8/4p3/3P4/5n2/8/8",
+        "2r3k1/p4p2/3Rp2p/1p2P1pK/8/1P4P1/P3Q2P/1q6",
+        "rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R",
     ];
 
     for fen in fens {
@@ -52,8 +54,7 @@ fn main() {
         fen::load_position_from_fen(fen.to_string(), &mut chess_state.board);
 
         let (friendly_movements, friendly_attacking) = generate_moves(&chess_state.board, &chess_state.color_to_move, &squares_to_edge);
-        display::display_chess_tui(&chess_state, &friendly_movements);
-        println!("{}", format_attacking_squares(&chess_state.board, &friendly_attacking));
+        display::display_chess_tui(&chess_state, &friendly_movements, &friendly_attacking);
     }
 }
 
@@ -62,20 +63,20 @@ fn format_attacking_squares(board: &[BoardPiece; 64], enemy_attacking: &Vec<i16>
     for enemy_attack_index in enemy_attacking {
         let square = board[*enemy_attack_index as usize];
         dbg!(square, enemy_attack_index);
-        let mut piece_string = helpers::display::format_piece(square);
-        piece_string.insert_str(0, ", ");
+        let piece_string = helpers::display::format_piece(square);
         str += &piece_string;
+        str.insert_str(0, ", ");
     }
     str
 }
 
 /**
- * Generates available moves
+ * Generates available moves.
  */
 fn generate_moves(board: &[BoardPiece; 64], current_player_color: &PieceColor, sqs_to_edge: &SquaresToEdge) -> (Vec<Move>, Vec<i16>) {
     let mut moves = Vec::<Move>::new();
-    let mut attacked_squares = Vec::<i16>::new(); // new addition
-
+    let mut attacked_squares = Vec::<i16>::new(); // new addition, it only gets the attacked
+                                                  // squares and not the square attacking it.
     for start_square in 0..64 { 
         // we're currently just caching all moves that a piece can do in a vector
         // it scans every square for a piece

@@ -1,7 +1,7 @@
 
 use crate::types::{Move, ChessPieces, PieceColor, ChessState, BoardPiece};
 
-pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
+pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squares: &Vec<i16>) {
     let mut print_index = 1;
     let mut position = 0;
 
@@ -19,14 +19,18 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
             ""
         };
 
-        let attack = if let Some(_) = movement.iter().find(|x| x.target_square == position) {
-            "*"
+        let move_str = if let Some(_) = movement.iter().find(|x| x.target_square == position) {
+            if let Some(_) = attacked_squares.iter().find(|square_position| **square_position == position) {
+                "x" 
+            } else {
+                "*" 
+            }
         } else {
             " "
         };
 
         let mut piece = format_piece(square);
-        piece.insert_str(0, attack);
+        piece.insert_str(0, move_str);
         print!("[{}]{}", piece, newline);
         print_index += 1;
         position += 1;
