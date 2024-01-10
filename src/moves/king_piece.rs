@@ -1,6 +1,6 @@
 
 use crate::helpers::color::is_color;
-use crate::types::{BoardPiece, ChessPieces, Move};
+use crate::types::{BoardPiece, Move};
 use crate::color::is_opponent_color;
 
 /**
@@ -32,6 +32,7 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
             };
             moves.push(movement);
 
+            dbg!(target_piece.1, board[start_square].1, start_square);
             if is_opponent_color(&target_piece.1, &board[start_square].1) {
                 let movement = Move {
                     start_square: start_square as i16,
