@@ -42,16 +42,11 @@ use crate::helpers::*;
 // Algebraic Notation for User Input
 fn main() {
     let fens = vec![
-        "r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1",
-        "3k4/8/8/3p4/3P4/8/8/3K4",
-        "8/8/4P3/1P2Q3/8/2P3N1/4N3/R7",
-        "rnbqkbnr/ppp1p1pp/3p4/5p2/4P3/3P4/PPP2PPP/RNBQKBNR",
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
-        "8/3K1R2/6B1/8/8/3r4/3k4/8"
+        "8/8/8/4p3/3P4/5n2/8/8"
     ];
 
     for fen in fens {
-        let mut chess_state = ChessState { color_to_move: PieceColor::White, ..Default::default() };
+        let mut chess_state = ChessState { color_to_move: PieceColor::Black, ..Default::default() };
         let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
         fen::load_position_from_fen(fen.to_string(), &mut chess_state.board);
@@ -59,12 +54,6 @@ fn main() {
         let (friendly_movements, friendly_attacking) = generate_moves(&chess_state.board, &chess_state.color_to_move, &squares_to_edge);
         display::display_chess_tui(&chess_state, &friendly_movements);
         println!("{}", format_attacking_squares(&chess_state.board, &friendly_attacking));
-
-        chess_state.color_to_move = PieceColor::Black;
-
-        let (enemy_movements, enemy_attacking) = generate_moves(&chess_state.board, &chess_state.color_to_move, &squares_to_edge);
-        display::display_chess_tui(&chess_state, &enemy_movements);
-        println!("{}", format_attacking_squares(&chess_state.board, &enemy_attacking));
     }
 }
 
@@ -86,10 +75,6 @@ fn format_attacking_squares(board: &[BoardPiece; 64], enemy_attacking: &Vec<i16>
 fn generate_moves(board: &[BoardPiece; 64], current_player_color: &PieceColor, sqs_to_edge: &SquaresToEdge) -> (Vec<Move>, Vec<i16>) {
     let mut moves = Vec::<Move>::new();
     let mut attacked_squares = Vec::<i16>::new(); // new addition
-                                                  // let me give you a rundown.
-                                                  //
-                                                  // Attacked squares take in the attacked squares
-                                                  // of White or Black.
 
     for start_square in 0..64 { 
         // we're currently just caching all moves that a piece can do in a vector

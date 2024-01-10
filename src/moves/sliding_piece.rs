@@ -37,7 +37,7 @@ pub fn generate_sliding_pieces(
                 moves.push(movements);
 
                 if is_opponent_color(&target_piece.1, &start_piece.1) {
-                    
+                    attacked_squares.push(target_square);
                     break;
                 }
             }

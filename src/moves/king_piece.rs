@@ -1,4 +1,5 @@
 
+use crate::helpers::color::is_color;
 use crate::types::{BoardPiece, ChessPieces, Move};
 use crate::color::is_opponent_color;
 
@@ -21,7 +22,7 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
             let target_square = (new_rank * 8 + new_file) as i16;
             let target_piece = board[target_square as usize];
 
-            if target_piece.0 == ChessPieces::Empty {
+            if is_color(&board[start_square].1, &target_piece.1) {
                 continue;
             }
 
