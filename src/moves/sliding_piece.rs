@@ -37,9 +37,16 @@ pub fn generate_sliding_pieces(
                 moves.push(movements);
 
                 if is_opponent_color(&target_piece.1, &start_piece.1) {
-                    attacked_squares.push(target_square);
-                    break;
-                }
+                    let movement = Move {
+                        start_square: start_square as i16,
+                        target_square,
+                    };
+                    
+                    if !attacked_squares.contains(&target_square) {
+                        moves.push(movement);
+                        attacked_squares.push(target_square);
+                    }
+            }
             }
         }
     }
