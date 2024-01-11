@@ -18,6 +18,8 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
 
     let (start_rank, start_file) = (start_square / 8, start_square % 8);
 
+    
+
     check_castle_condition(board.map(|f| f.0)[0..8].try_into().unwrap(), is_able_to_castle);
 
     for (rank_offset, file_offset) in king_moves {
@@ -51,18 +53,16 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
     }
 }
 
-fn check_castle_condition(rank: [ChessPieces; 8], is_able_to_castle: &Castle) {
-    // is_able_to_castle will be used in the FEN string so we can maintain state.
+fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle) {
+    if is_able_to_castle.queenside {
+        if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
+            println!("King can castle. Queenside.");
+        }
+    }
 
-    let kingside = [
-        ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, 
-    ];
-    let queenside = [
-        ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks
-    ];
-    if rank[0..3] == kingside && is_able_to_castle.kingside {
-        println!("King can castle. Kingside.");
-    } else if rank[5..8] == queenside && is_able_to_castle.queenside {
-        println!("King can castle. Queenside.");
+    if is_able_to_castle.kingside {
+        if let [.., ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks] = ranks {
+            println!("King can castle. Kingside.");
+        }
     }
 }
