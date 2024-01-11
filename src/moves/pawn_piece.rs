@@ -27,6 +27,7 @@ pub fn generate_pawn_moves(
                 let movement = Move {
                     start_square: start_square as i16,
                     target_square,
+                    move_type: Default::default() 
                 };
                 moves.push(movement);
 
@@ -44,6 +45,7 @@ pub fn generate_pawn_moves(
                     let double_movement = Move {
                         start_square: start_square as i16,
                         target_square: double_target_square,
+                        move_type: Default::default() 
                     };
                     moves.push(double_movement);
                 }
@@ -55,13 +57,11 @@ pub fn generate_pawn_moves(
                     let movement = Move {
                         start_square: start_square as i16,
                         target_square,
+                        move_type: Default::default() 
                     };
-                    
-                    if !attacked_squares.contains(&target_square) {
-                        moves.push(movement);
-                        attacked_squares.push(target_square);
-                    }
-            }
+                    moves.push(movement);
+                    attacked_squares.push(target_square);
+                }
             }
         }
     }

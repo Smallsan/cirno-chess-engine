@@ -33,20 +33,22 @@ pub fn generate_sliding_pieces(
                     break;
                 }
 
-                let movements = Move { start_square: start_square as i16, target_square };
+                let movements = Move { 
+                    start_square: start_square as i16, 
+                    target_square, 
+                    move_type: Default::default() 
+                };
                 moves.push(movements);
 
                 if is_opponent_color(&target_piece.1, &start_piece.1) {
                     let movement = Move {
                         start_square: start_square as i16,
                         target_square,
+                        move_type: Default::default() 
                     };
-                    
-                    if !attacked_squares.contains(&target_square) {
-                        moves.push(movement);
-                        attacked_squares.push(target_square);
-                    }
-            }
+                    moves.push(movement);
+                    attacked_squares.push(target_square);
+                }
             }
         }
     }

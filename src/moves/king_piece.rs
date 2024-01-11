@@ -1,18 +1,24 @@
 
 use crate::helpers::color::is_color;
-use crate::types::{BoardPiece, Move};
+use crate::types::{BoardPiece, Move, Castle, ChessPieces};
 use crate::color::is_opponent_color;
 
 /**
- * King = Not done: Castling
+ * King:
+ * - Castling (in progress)
+ * - Pins
+ *
+ * make FEN decoder support castling
  */
-pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves: &mut Vec<Move>, attacked_squares: &mut Vec<i16>) {
+pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves: &mut Vec<Move>, attacked_squares: &mut Vec<i16>, is_able_to_castle: &Castle) {
     let king_moves = [
         (-1, -1), (-1, 0), (-1, 1), (0, -1),
         (0, 1), (1, -1), (1, 0), (1, 1),
     ];
 
     let (start_rank, start_file) = (start_square / 8, start_square % 8);
+
+    check_castle_condition(board.map(|f| f.0)[0..8].try_into().unwrap(), is_able_to_castle);
 
     for (rank_offset, file_offset) in king_moves {
         let new_rank = start_rank as i16 + rank_offset;
@@ -29,17 +35,34 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
             moves.push(Move {
                 start_square: start_square as i16,
                 target_square,
+                move_type: Default::default() 
             });
 
+
             if is_opponent_color(&target_piece.1, &board[start_square].1) {
-                if !attacked_squares.contains(&target_square) {
-                    moves.push(Move {
-                        start_square: start_square as i16,
-                        target_square,
-                    });
-                    attacked_squares.push(target_square);
-                }
+                moves.push(Move {
+                    start_square: start_square as i16,
+                    target_square,
+                    move_type: Default::default() 
+                });
+                attacked_squares.push(target_square);
             }
         }
+    }
+}
+
+fn check_castle_condition(rank: [ChessPieces; 8], is_able_to_castle: &Castle) {
+    // is_able_to_castle will be used in the FEN string so we can maintain state.
+
+    let kingside = [
+        ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, 
+    ];
+    let queenside = [
+        ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks
+    ];
+    if rank[0..3] == kingside && is_able_to_castle.kingside {
+        println!("King can castle. Kingside.");
+    } else if rank[5..8] == queenside && is_able_to_castle.queenside {
+        println!("King can castle. Queenside.");
     }
 }

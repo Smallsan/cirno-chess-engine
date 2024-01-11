@@ -21,20 +21,23 @@ pub fn generate_knight_moves(start_square: usize, board: &[BoardPiece; 64], move
                 continue;
             }
 
-            let movement = Move { start_square: start_square as i16, target_square: target_square as i16 };
+            let movement = Move { 
+                start_square: start_square as i16, 
+                target_square: target_square as i16,
+                move_type: Default::default() 
+            };
             moves.push(movement);
 
             if is_opponent_color(&target_piece.1, &board[start_square].1) {
                 let movement = Move {
                     start_square: start_square as i16,
                     target_square,
+                    move_type: Default::default() 
                 };
                 
-                if !attacked_squares.contains(&target_square) {
-                    moves.push(movement);
-                    attacked_squares.push(target_square);
-                }
+                moves.push(movement);
+                attacked_squares.push(target_square);
+            }
         }
     }
-}
 }
