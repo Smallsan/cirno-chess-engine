@@ -20,7 +20,6 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squa
         };
 
         let move_str = if let Some(mo) = movement.iter().find(|x| x.target_square == position) {
-            dbg!(mo.move_type);
             match mo.move_type {
                 MoveType::Castle => "&",
                 MoveType::Normal => {

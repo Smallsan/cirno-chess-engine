@@ -25,6 +25,7 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
     let (start_rank, start_file) = (start_square / 8, start_square % 8);
 
     let castle = check_castle_condition(board.map(|f| f.0)[0..8].try_into().unwrap(), is_able_to_castle);
+    dbg!(&castle);
     if castle.queenside {
         moves.push(Move { 
             start_square: start_square as i16, 
@@ -39,7 +40,6 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
             move_type: MoveType::Castle 
         });
     }
-    dbg!(&castle.queenside);
 
     for (rank_offset, file_offset) in king_moves {
         let new_rank = start_rank as i16 + rank_offset;
@@ -79,7 +79,7 @@ fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle) 
         kingside: false,
     };
     if is_able_to_castle.queenside {
-        if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
+        if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
             sides.queenside = true;
         } else {
             sides.queenside = false;
@@ -90,7 +90,7 @@ fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle) 
         if let [.., ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks] = ranks {
             sides.kingside = true;
         } else {
-            sides.queenside = false;
+            sides.kingside = false;
         }
     };
     sides
