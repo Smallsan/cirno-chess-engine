@@ -1,6 +1,5 @@
-
-use crate::types::{BoardPiece, Move, ChessPieces, PieceColor};
 use crate::color::is_opponent_color;
+use crate::types::{BoardPiece, ChessPieces, Move, PieceColor};
 
 /*
  * Promotion left.
@@ -10,7 +9,7 @@ pub fn generate_pawn_moves(
     board: &[BoardPiece; 64],
     current_player_color: &PieceColor,
     moves: &mut Vec<Move>,
-    attacked_squares: &mut Vec::<i16>,
+    attacked_squares: &mut Vec<i16>,
 ) {
     let direction_offsets = match current_player_color {
         PieceColor::White => [8, 7, 9],    // White pawn moves
@@ -27,7 +26,7 @@ pub fn generate_pawn_moves(
                 let movement = Move {
                     start_square: start_square as i16,
                     target_square,
-                    move_type: Default::default() 
+                    move_type: Default::default(),
                 };
                 moves.push(movement);
 
@@ -45,7 +44,7 @@ pub fn generate_pawn_moves(
                     let double_movement = Move {
                         start_square: start_square as i16,
                         target_square: double_target_square,
-                        move_type: Default::default() 
+                        move_type: Default::default(),
                     };
                     moves.push(double_movement);
                 }
@@ -57,7 +56,7 @@ pub fn generate_pawn_moves(
                     let movement = Move {
                         start_square: start_square as i16,
                         target_square,
-                        move_type: Default::default() 
+                        move_type: Default::default(),
                     };
                     moves.push(movement);
                     attacked_squares.push(target_square);
@@ -65,5 +64,4 @@ pub fn generate_pawn_moves(
             }
         }
     }
-
 }

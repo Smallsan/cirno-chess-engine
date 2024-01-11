@@ -1,18 +1,17 @@
-
-use crate::types::{BoardPiece, Move, SquaresToEdge, ChessPieces};
 use crate::color::{is_color, is_opponent_color};
+use crate::types::{BoardPiece, ChessPieces, Move, SquaresToEdge};
 
 pub fn generate_sliding_pieces(
-    start_square: usize, 
-    board: &[BoardPiece; 64], 
+    start_square: usize,
+    board: &[BoardPiece; 64],
     moves: &mut Vec<Move>,
     attacked_squares: &mut Vec<i16>,
     sqs_to_edge: &SquaresToEdge,
 ) {
     let start_piece = &board[start_square];
-    let direction_offsets: [i16; 8] = [ 
+    let direction_offsets: [i16; 8] = [
         8, -8, -1, 1, // Up, Down, Left, Right
-        7, -7,  9, -9 // Diagonals
+        7, -7, 9, -9, // Diagonals
     ];
 
     let (start_direction_index, end_direction_index) = match start_piece.0 {
@@ -23,7 +22,8 @@ pub fn generate_sliding_pieces(
     };
 
     for direction_index in start_direction_index..end_direction_index {
-        for n in 0..sqs_to_edge[start_square][direction_index] { // loops through the "directions"
+        for n in 0..sqs_to_edge[start_square][direction_index] {
+            // loops through the "directions"
             let target_square = start_square as i16 + direction_offsets[direction_index] * (n + 1);
             let target_piece = board.get(target_square as usize);
 
@@ -33,10 +33,10 @@ pub fn generate_sliding_pieces(
                     break;
                 }
 
-                let movements = Move { 
-                    start_square: start_square as i16, 
-                    target_square, 
-                    move_type: Default::default() 
+                let movements = Move {
+                    start_square: start_square as i16,
+                    target_square,
+                    move_type: Default::default(),
                 };
                 moves.push(movements);
 
@@ -44,7 +44,7 @@ pub fn generate_sliding_pieces(
                     let movement = Move {
                         start_square: start_square as i16,
                         target_square,
-                        move_type: Default::default() 
+                        move_type: Default::default(),
                     };
                     moves.push(movement);
                     attacked_squares.push(target_square);

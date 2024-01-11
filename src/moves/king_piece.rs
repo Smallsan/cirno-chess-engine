@@ -1,7 +1,6 @@
-
-use crate::helpers::color::is_color;
-use crate::types::{BoardPiece, Move, Castle, ChessPieces, PieceColor, MoveType};
 use crate::color::is_opponent_color;
+use crate::helpers::color::is_color;
+use crate::types::{BoardPiece, Castle, ChessPieces, Move, MoveType, PieceColor};
 
 /**
  * King:
@@ -10,10 +9,22 @@ use crate::color::is_opponent_color;
  *
  * make FEN decoder support castling
  */
-pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves: &mut Vec<Move>, attacked_squares: &mut Vec<i16>, is_able_to_castle: &Castle) {
+pub fn generate_king_moves(
+    start_square: usize,
+    board: &[BoardPiece; 64],
+    moves: &mut Vec<Move>,
+    attacked_squares: &mut Vec<i16>,
+    is_able_to_castle: &Castle,
+) {
     let king_moves = [
-        (-1, -1), (-1, 0), (-1, 1), (0, -1),
-        (0, 1), (1, -1), (1, 0), (1, 1),
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
     ];
     let start_piece = board[start_square];
 
@@ -23,21 +34,24 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
 
     let first_square_of_rank = start_rank * 8;
     let last_square_of_rank = (start_rank + 1) * 8;
-    let rank_range = first_square_of_rank .. last_square_of_rank;
-    let castle = check_castle_condition(board.map(|f| f.0)[rank_range].try_into().unwrap(), is_able_to_castle);
+    let rank_range = first_square_of_rank..last_square_of_rank;
+    let castle = check_castle_condition(
+        board.map(|f| f.0)[rank_range].try_into().unwrap(),
+        is_able_to_castle,
+    );
 
     if castle.queenside {
-        moves.push(Move { 
-            start_square: start_square as i16, 
-            target_square: start_square as i16 - 3, 
-            move_type: MoveType::Castle 
+        moves.push(Move {
+            start_square: start_square as i16,
+            target_square: start_square as i16 - 2,
+            move_type: MoveType::Castle,
         });
     }
     if castle.kingside {
-        moves.push(Move { 
-            start_square: start_square as i16, 
-            target_square: start_square as i16 + 2, 
-            move_type: MoveType::Castle 
+        moves.push(Move {
+            start_square: start_square as i16,
+            target_square: start_square as i16 + 2,
+            move_type: MoveType::Castle,
         });
     }
 
@@ -56,15 +70,14 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
             moves.push(Move {
                 start_square: start_square as i16,
                 target_square,
-                move_type: Default::default() 
+                move_type: Default::default(),
             });
-
 
             if is_opponent_color(&target_piece.1, &start_piece.1) {
                 moves.push(Move {
                     start_square: start_square as i16,
                     target_square,
-                    move_type: Default::default() 
+                    move_type: Default::default(),
                 });
                 attacked_squares.push(target_square);
             }
@@ -79,7 +92,9 @@ fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle) 
         kingside: false,
     };
     if is_able_to_castle.queenside {
-        if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
+        if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] =
+            ranks
+        {
             sides.queenside = true;
         } else {
             sides.queenside = false;
