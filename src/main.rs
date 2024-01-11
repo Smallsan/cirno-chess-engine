@@ -47,6 +47,7 @@ fn main() {
         "2r3k1/p4p2/3Rp2p/1p2P1pK/8/1P4P1/P3Q2P/1q6",
         "rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R",
         "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R",
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R",
     ];
 
     for fen in fens {
@@ -62,7 +63,10 @@ fn main() {
             &chess_state.board, 
             &chess_state.color_to_move, 
             &squares_to_edge, 
-            &chess_state.is_able_to_castle,
+            &Castle{
+                kingside: true,
+                queenside: true,
+            },
         );
         display::display_chess_tui(&chess_state, &friendly_movements, &friendly_attacking);
     }
