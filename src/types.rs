@@ -1,4 +1,3 @@
-
 pub type BoardPiece = (ChessPieces, PieceColor);
 pub type SquaresToEdge = [[i16; 8]; 64];
 
@@ -17,10 +16,11 @@ pub enum ChessPieces {
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum PieceColor {
-    White, Black, 
+    White,
+    Black,
 
     #[default]
-    None
+    None,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
