@@ -43,19 +43,15 @@ use crate::helpers::*;
 // Algebraic Notation for User Input
 fn main() {
     let fens = vec![
-        "8/8/8/4p3/3P4/5n2/8/8",
-        "2r3k1/p4p2/3Rp2p/1p2P1pK/8/1P4P1/P3Q2P/1q6",
-        "rn3rk1/pbppq1pp/1p2pb2/4N2Q/3PN3/3B4/PPP2PPP/R3K2R",
         "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R",
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R",
     ];
 
+    let squares_to_edge = generate_moves::precompute_squares_to_edge();
     for fen in fens {
         let mut chess_state = ChessState { 
             color_to_move: PieceColor::Black, 
             ..Default::default() 
         };
-        let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
         fen::load_position_from_fen(fen.to_string(), &mut chess_state.board);
 
@@ -68,7 +64,12 @@ fn main() {
                 queenside: true,
             },
         );
-        display::display_chess_tui(&chess_state, &friendly_movements, &friendly_attacking);
+        for x in friendly_movements {
+            if x.move_type == MoveType::Castle {
+                dbg!(x);
+            }
+        }
+        // display::display_chess_tui(&chess_state, &friendly_movements, &friendly_attacking);
     }
 }
 

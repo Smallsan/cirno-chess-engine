@@ -16,27 +16,27 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
         (0, 1), (1, -1), (1, 0), (1, 1),
     ];
     let start_piece = board[start_square];
-    let (queenside, kingside) = match start_piece.1 {
-        PieceColor::White => (1, 6),
-        PieceColor::Black => (57, 62),
-        PieceColor::None => (0, 0),
-    };
 
     let (start_rank, start_file) = (start_square / 8, start_square % 8);
+    // rank = horizontal
+    // file = vertical
 
-    let castle = check_castle_condition(board.map(|f| f.0)[0..8].try_into().unwrap(), is_able_to_castle);
-    dbg!(&castle);
+    let first_square_of_rank = start_rank * 8;
+    let last_square_of_rank = (start_rank + 1) * 8;
+    let rank_range = first_square_of_rank .. last_square_of_rank;
+    let castle = check_castle_condition(board.map(|f| f.0)[rank_range].try_into().unwrap(), is_able_to_castle);
+
     if castle.queenside {
         moves.push(Move { 
             start_square: start_square as i16, 
-            target_square: queenside, 
+            target_square: start_square as i16 - 3, 
             move_type: MoveType::Castle 
         });
     }
     if castle.kingside {
         moves.push(Move { 
             start_square: start_square as i16, 
-            target_square: kingside, 
+            target_square: start_square as i16 + 2, 
             move_type: MoveType::Castle 
         });
     }

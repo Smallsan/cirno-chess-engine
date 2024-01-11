@@ -2,14 +2,14 @@
 use crate::types::{Move, ChessPieces, PieceColor, ChessState, BoardPiece, Castle, MoveType};
 
 pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squares: &Vec<i16>) {
-    let mut print_index = 1;
-    let mut position = 0;
-
     let turn_color = match state.color_to_move {
         PieceColor::White => "White",
         PieceColor::Black => "Black",
         PieceColor::None => "Something errored out."
     };
+
+    let mut print_index = 1;
+    let mut position = 0;
     print!("\n{turn_color}'s turn\n");
     for square in state.board {
         let newline = if print_index % 8 == 0 {
@@ -21,7 +21,6 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squa
 
         let move_str = if let Some(mo) = movement.iter().find(|x| x.target_square == position) {
             match mo.move_type {
-                MoveType::Castle => "&",
                 MoveType::Normal => {
                     if let Some(_) = attacked_squares.iter().find(|square_position| **square_position == position) {
                         "x" 
@@ -29,6 +28,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squa
                         "*" 
                     }
                 },
+                MoveType::Castle => "&",
                 MoveType::EnPassant => "x",
                 MoveType::Promotion => "!",
             }
