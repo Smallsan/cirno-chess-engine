@@ -52,7 +52,7 @@ fn main() {
 
     for fen in fens {
         let mut chess_state = ChessState { 
-            color_to_move: PieceColor::White, 
+            color_to_move: PieceColor::Black, 
             ..Default::default() 
         };
         let squares_to_edge = generate_moves::precompute_squares_to_edge();

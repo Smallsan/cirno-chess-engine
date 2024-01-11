@@ -1,5 +1,5 @@
 
-use crate::types::{Move, ChessPieces, PieceColor, ChessState, BoardPiece};
+use crate::types::{Move, ChessPieces, PieceColor, ChessState, BoardPiece, Castle, MoveType};
 
 pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squares: &Vec<i16>) {
     let mut print_index = 1;
@@ -19,11 +19,19 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squa
             ""
         };
 
-        let move_str = if let Some(_) = movement.iter().find(|x| x.target_square == position) {
-            if let Some(_) = attacked_squares.iter().find(|square_position| **square_position == position) {
-                "x" 
-            } else {
-                "*" 
+        let move_str = if let Some(mo) = movement.iter().find(|x| x.target_square == position) {
+            dbg!(mo.move_type);
+            match mo.move_type {
+                MoveType::Castle => "&",
+                MoveType::Normal => {
+                    if let Some(_) = attacked_squares.iter().find(|square_position| **square_position == position) {
+                        "x" 
+                    } else {
+                        "*" 
+                    }
+                },
+                MoveType::EnPassant => "x",
+                MoveType::Promotion => "!",
             }
         } else {
             " "

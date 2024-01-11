@@ -18,6 +18,7 @@ pub enum ChessPieces {
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum PieceColor {
     White, Black, 
+
     #[default]
     None
 }
@@ -27,6 +28,7 @@ pub enum MoveType {
     Castle,
     EnPassant,
     Promotion,
+
     #[default]
     Normal,
 }

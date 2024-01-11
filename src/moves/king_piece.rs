@@ -1,6 +1,6 @@
 
 use crate::helpers::color::is_color;
-use crate::types::{BoardPiece, Move, Castle, ChessPieces};
+use crate::types::{BoardPiece, Move, Castle, ChessPieces, PieceColor, MoveType};
 use crate::color::is_opponent_color;
 
 /**
@@ -15,12 +15,31 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
         (-1, -1), (-1, 0), (-1, 1), (0, -1),
         (0, 1), (1, -1), (1, 0), (1, 1),
     ];
+    let start_piece = board[start_square];
+    let (queenside, kingside) = match start_piece.1 {
+        PieceColor::White => (1, 6),
+        PieceColor::Black => (57, 62),
+        PieceColor::None => (0, 0),
+    };
 
     let (start_rank, start_file) = (start_square / 8, start_square % 8);
 
-    
-
-    check_castle_condition(board.map(|f| f.0)[0..8].try_into().unwrap(), is_able_to_castle);
+    let castle = check_castle_condition(board.map(|f| f.0)[0..8].try_into().unwrap(), is_able_to_castle);
+    if castle.queenside {
+        moves.push(Move { 
+            start_square: start_square as i16, 
+            target_square: queenside, 
+            move_type: MoveType::Castle 
+        });
+    }
+    if castle.kingside {
+        moves.push(Move { 
+            start_square: start_square as i16, 
+            target_square: kingside, 
+            move_type: MoveType::Castle 
+        });
+    }
+    dbg!(&castle.queenside);
 
     for (rank_offset, file_offset) in king_moves {
         let new_rank = start_rank as i16 + rank_offset;
@@ -30,7 +49,7 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
             let target_square = (new_rank * 8 + new_file) as i16;
             let target_piece = board[target_square as usize];
 
-            if is_color(&board[start_square].1, &target_piece.1) {
+            if is_color(&start_piece.1, &target_piece.1) {
                 continue;
             }
 
@@ -41,7 +60,7 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
             });
 
 
-            if is_opponent_color(&target_piece.1, &board[start_square].1) {
+            if is_opponent_color(&target_piece.1, &start_piece.1) {
                 moves.push(Move {
                     start_square: start_square as i16,
                     target_square,
@@ -53,16 +72,26 @@ pub fn generate_king_moves(start_square: usize, board: &[BoardPiece; 64], moves:
     }
 }
 
-fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle) {
+// is_able_to_castle is a struct that's built from FEN and is modified by a piece moving.
+fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle) -> Castle {
+    let mut sides = Castle {
+        queenside: false,
+        kingside: false,
+    };
     if is_able_to_castle.queenside {
         if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
-            println!("King can castle. Queenside.");
+            sides.queenside = true;
+        } else {
+            sides.queenside = false;
         }
-    }
+    };
 
     if is_able_to_castle.kingside {
         if let [.., ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks] = ranks {
-            println!("King can castle. Kingside.");
+            sides.kingside = true;
+        } else {
+            sides.queenside = false;
         }
-    }
+    };
+    sides
 }
