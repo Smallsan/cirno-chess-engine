@@ -1,5 +1,5 @@
 use crate::color::is_opponent_color;
-use crate::types::{BoardPiece, ChessPieces, Move, PieceColor};
+use crate::types::{BoardPiece, ChessPieces, Move, PieceColor, MoveType};
 
 /*
  * Promotion left.
@@ -9,7 +9,6 @@ pub fn generate_pawn_moves(
     board: &[BoardPiece; 64],
     current_player_color: &PieceColor,
     moves: &mut Vec<Move>,
-    attacked_squares: &mut Vec<i16>,
 ) {
     let direction_offsets = match current_player_color {
         PieceColor::White => [8, 7, 9],    // White pawn moves
@@ -26,7 +25,7 @@ pub fn generate_pawn_moves(
                 let movement = Move {
                     start_square: start_square as i16,
                     target_square,
-                    move_type: Default::default(),
+                    move_type: MoveType::NoCapture,
                 };
                 moves.push(movement);
 
@@ -39,27 +38,27 @@ pub fn generate_pawn_moves(
 
                 let start_rank = start_square / 8;
 
+                // moving the pieces
                 if start_rank == initial_rank && target_piece.0 == ChessPieces::Empty {
                     let double_target_square = start_square as i16 + direction_offset * 2;
                     let double_movement = Move {
                         start_square: start_square as i16,
                         target_square: double_target_square,
-                        move_type: Default::default(),
+                        move_type: MoveType::NoCapture,
                     };
                     moves.push(double_movement);
                 }
             }
 
-            // eating.
+            // eating the pieces.
             if matches!(direction_offset, -7 | 7 | -9 | 9) {
                 if is_opponent_color(&target_piece.1, current_player_color) {
                     let movement = Move {
                         start_square: start_square as i16,
                         target_square,
-                        move_type: Default::default(),
+                        move_type: MoveType::Normal,
                     };
                     moves.push(movement);
-                    attacked_squares.push(target_square);
                 }
             }
         }

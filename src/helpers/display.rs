@@ -1,6 +1,6 @@
 use crate::types::{BoardPiece, Castle, ChessPieces, ChessState, Move, MoveType, PieceColor};
 
-pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squares: &Vec<i16>) {
+pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
     let turn_color = match state.color_to_move {
         PieceColor::White => "White",
         PieceColor::Black => "Black",
@@ -26,16 +26,8 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>, attacked_squa
         let move_str = if let Some(mo) = castling_moves.iter().find(|x| x.target_square == position)
         {
             match mo.move_type {
-                MoveType::Normal => {
-                    if let Some(_) = attacked_squares
-                        .iter()
-                        .find(|square_position| **square_position == position)
-                    {
-                        "x"
-                    } else {
-                        "*"
-                    }
-                }
+                MoveType::Normal => "*",
+                MoveType::NoCapture => "^",
                 MoveType::Castle => "&",
                 MoveType::EnPassant => "x",
                 MoveType::Promotion => "!",

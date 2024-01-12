@@ -1,11 +1,10 @@
 use crate::color::{is_color, is_opponent_color};
-use crate::types::{BoardPiece, ChessPieces, Move, SquaresToEdge};
+use crate::types::{BoardPiece, ChessPieces, Move, SquaresToEdge, MoveType};
 
 pub fn generate_sliding_pieces(
     start_square: usize,
     board: &[BoardPiece; 64],
     moves: &mut Vec<Move>,
-    attacked_squares: &mut Vec<i16>,
     sqs_to_edge: &SquaresToEdge,
 ) {
     let start_piece = &board[start_square];
@@ -36,7 +35,7 @@ pub fn generate_sliding_pieces(
                 let movements = Move {
                     start_square: start_square as i16,
                     target_square,
-                    move_type: Default::default(),
+                    move_type: MoveType::Normal,
                 };
                 moves.push(movements);
 
@@ -44,10 +43,9 @@ pub fn generate_sliding_pieces(
                     let movement = Move {
                         start_square: start_square as i16,
                         target_square,
-                        move_type: Default::default(),
+                        move_type: MoveType::Normal,
                     };
                     moves.push(movement);
-                    attacked_squares.push(target_square);
                 }
             }
         }

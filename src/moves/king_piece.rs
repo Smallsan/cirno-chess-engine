@@ -13,7 +13,6 @@ pub fn generate_king_moves(
     start_square: usize,
     board: &[BoardPiece; 64],
     moves: &mut Vec<Move>,
-    attacked_squares: &mut Vec<i16>,
     is_able_to_castle: &Castle,
 ) {
     let king_moves = [
@@ -70,16 +69,15 @@ pub fn generate_king_moves(
             moves.push(Move {
                 start_square: start_square as i16,
                 target_square,
-                move_type: Default::default(),
+                move_type: MoveType::Normal,
             });
 
             if is_opponent_color(&target_piece.1, &start_piece.1) {
                 moves.push(Move {
                     start_square: start_square as i16,
                     target_square,
-                    move_type: Default::default(),
+                    move_type: MoveType::Normal,
                 });
-                attacked_squares.push(target_square);
             }
         }
     }

@@ -1,11 +1,10 @@
 use crate::helpers::color::*;
-use crate::types::{BoardPiece, Move};
+use crate::types::{BoardPiece, Move, MoveType};
 
 pub fn generate_knight_moves(
     start_square: usize,
     board: &[BoardPiece; 64],
     moves: &mut Vec<Move>,
-    attacked_squares: &mut Vec<i16>,
 ) {
     let knight_moves = [
         (-1, -2),
@@ -34,7 +33,7 @@ pub fn generate_knight_moves(
             let movement = Move {
                 start_square: start_square as i16,
                 target_square: target_square as i16,
-                move_type: Default::default(),
+                move_type: MoveType::Normal,
             };
             moves.push(movement);
 
@@ -42,11 +41,8 @@ pub fn generate_knight_moves(
                 let movement = Move {
                     start_square: start_square as i16,
                     target_square,
-                    move_type: Default::default(),
+                    move_type: MoveType::Normal,
                 };
-
-                moves.push(movement);
-                attacked_squares.push(target_square);
             }
         }
     }

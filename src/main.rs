@@ -35,32 +35,27 @@ use crate::types::*;
 //      - En Passant
 //      - Promotions
 // King
-//      - Castling (in progress)
-//      - King Pins
+//      - Castling (FEN strings)
+//      - King Pins (In Progress)
 // Algebraic Notation for User Input
 fn main() {
-    let fens = vec!["r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R"];
+    let fens = vec![
+        "8/8/8/8/2r1P1K1/8/8/8",
+        "8/8/8/8/8/4p3/3P1P2/8",
+        "8/8/8/8/8/3npb2/3P1P2/8"
+    ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
     for fen in fens {
-        let mut chess_state = ChessState {
-            color_to_move: PieceColor::Black,
-            ..Default::default()
-        };
+        let fen_state = fen::load_fen_state(fen.to_string()).unwrap();
 
-        fen::load_position_from_fen(fen.to_string(), &mut chess_state.board);
-
-        let (friendly_movements, friendly_attacking) = generate_moves(
-            &chess_state.board,
-            &chess_state.color_to_move,
+        let friendly_movements = generate_moves(
+            &fen_state.board,
+            &fen_state.color_to_move,
+            &fen_state.is_able_to_castle,
             &squares_to_edge,
-            &Castle {
-                kingside: true,
-                queenside: true,
-            },
         );
-
-        display::display_chess_tui(&chess_state, &friendly_movements, &friendly_attacking);
+        display::display_chess_tui(&fen_state, &friendly_movements);
     }
 }
 
@@ -70,12 +65,11 @@ fn main() {
 fn generate_moves(
     board: &[BoardPiece; 64],
     current_player_color: &PieceColor,
-    sqs_to_edge: &SquaresToEdge,
     is_able_to_castle: &Castle,
-) -> (Vec<Move>, Vec<i16>) {
+    sqs_to_edge: &SquaresToEdge,
+) -> Vec<Move> {
     let mut moves = Vec::<Move>::new();
-    let mut attacked_squares = Vec::<i16>::new(); // new addition, it only gets the attacked
-                                                  // squares and not the square attacking it.
+
     for start_square in 0..64 {
         // we're currently just caching all moves that a piece can do in a vector
         // it scans every square for a piece
@@ -87,21 +81,18 @@ fn generate_moves(
                         start_square,
                         board,
                         &mut moves,
-                        &mut attacked_squares,
                         is_able_to_castle,
                     ),
                     ChessPieces::Knights => knight_piece::generate_knight_moves(
                         start_square,
                         board,
                         &mut moves,
-                        &mut attacked_squares,
                     ),
                     ChessPieces::Bishops | ChessPieces::Queens | ChessPieces::Rooks => {
                         sliding_piece::generate_sliding_pieces(
                             start_square,
                             board,
                             &mut moves,
-                            &mut attacked_squares,
                             sqs_to_edge,
                         )
                     }
@@ -110,7 +101,6 @@ fn generate_moves(
                         board,
                         current_player_color,
                         &mut moves,
-                        &mut attacked_squares,
                     ),
                     _ => (),
                 };
@@ -118,17 +108,5 @@ fn generate_moves(
         }
     }
 
-    return (moves, attacked_squares);
-}
-
-fn format_attacking_squares(board: &[BoardPiece; 64], enemy_attacking: &Vec<i16>) -> String {
-    let mut res = String::new();
-    for enemy_attack_index in enemy_attacking {
-        let square = board[*enemy_attack_index as usize];
-        dbg!(square, enemy_attack_index);
-        let piece_string = helpers::display::format_piece(square);
-        res += &piece_string;
-        res.insert_str(0, ", ");
-    }
-    res
+    return moves;
 }
