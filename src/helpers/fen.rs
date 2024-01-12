@@ -28,7 +28,7 @@ pub fn load_fen_state(fen: String) -> Result<ChessState, &'static str> {
     for (i, &part) in fen.iter().skip(1).enumerate() {
         match i {
             0 => state.color_to_move = parse_turn(part),
-            1 => state.is_able_to_castle = parse_castle(part),
+            1 => state.is_able_to_castle = parse_castle(part).unwrap(),
             _ => return Err("Invalid/Unimplemented FEN string")
         }
     }
@@ -53,12 +53,14 @@ fn parse_castle(part: &str) -> Result<Castle, &'static str> {
         match char {
             'Q' | 'q' => {
                 castle.queenside = true;
-                Ok(_)
-            },
-            'K' | 'k' => castle.kingside = true,
-            _ => Err("Wrong input for Castles."),
+            }
+            'K' | 'k' => {
+                castle.kingside = true;
+            }
+            _ => return Err("Wrong input for Castles."),
         }
     }
+    
     Ok(castle)
 }
 
