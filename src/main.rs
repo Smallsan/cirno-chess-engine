@@ -46,14 +46,20 @@ fn main() {
         "8/8/8/8/8/4p3/3P1P2/8 b",
         "8/8/8/8/8/3npb2/3P1P2/8 w",
     ];
-    let castling = vec![
+    let _castling = vec![
         "rnbqk2r/ppp5/8/8/8/8/P7/R2QKBNR b KQkq - 0 1",
         "rnbqk2r/ppp5/8/8/8/8/P7/R3K2R w KQkq - 0 1",
+    ];
+    let check = vec![
+        "rnbq1bnr/pppppppp/8/8/2k1Q3/8/PPPP1PPP/RNB1KBNR w KQ - 0 1",
+        "8/8/8/8/2k1Q3/8/8/8 w - 0 1",
+        "8/8/8/8/2k1Q3/8/8/2R5 w",
+        "8/8/3B4/8/2k1Q3/6B1/8/2R5 w"
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
-    for fen in castling {
+    for fen in check {
         let fen_state = match fen::load_fen_state(fen.to_string(), &squares_to_edge) {
             Ok(state) => state,
             Err(err) => {
@@ -69,8 +75,34 @@ fn main() {
             &squares_to_edge,
         );
         // detect check and pinned here.
-        // friendly_movements.iter().filter(|moves| moves.move_type == types::MoveType::Normal);
+        detect_check(&fen_state.board, &friendly_movements);
         display::display_chess_tui(&fen_state, &friendly_movements);
+    }
+}
+
+/*
+     I have an idea.
+
+     When the pieces' movement hits a piece, it should stop there.
+        But when we're searching for pins, we should continue on from the stopped movement.
+        like:
+        [k ][  ][  ][  ][  ] // stop when it hits another piece, check if that piece is a king or not.
+        [  ][ *][  ][  ][  ]
+        [  ][  ][N*][  ][  ] // movement should stop here, but piercing continues on from this point.
+        [  ][  ][  ][ *][  ]
+        [  ][  ][  ][  ][B ]
+*/
+
+fn detect_check(board: &[BoardPiece; 64], movement: &Vec<Move>) {
+    let mut position = 0;
+    for start_square in board {
+        if matches!(start_square.0, ChessPieces::Rooks | ChessPieces::Queens | ChessPieces::Bishops) {
+            if let Some(king_piece_move) = movement.iter().find(|moves| 
+                                                                &board[moves.start_square as usize] == start_square && board[moves.target_square as usize].0 == ChessPieces::Kings) {
+                println!("Start: {:?}, Target: {:?}", board[position as usize], board[king_piece_move.target_square as usize]);
+            }
+        }
+        position += 1;
     }
 }
 

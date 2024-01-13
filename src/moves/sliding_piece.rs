@@ -46,6 +46,7 @@ pub fn generate_sliding_pieces(
                         move_type: MoveType::Normal,
                     };
                     moves.push(movement);
+                    break;
                 }
             }
         }
