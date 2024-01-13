@@ -16,3 +16,7 @@ pub fn is_opponent_color(piece_color: &PieceColor, other_piece_color: &PieceColo
         PieceColor::None => false,
     }
 }
+
+pub fn is_not_empty(piece_color: &PieceColor) -> bool {
+    piece_color != &PieceColor::None
+}

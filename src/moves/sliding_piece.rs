@@ -1,5 +1,5 @@
 use crate::color::{is_color, is_opponent_color};
-use crate::types::{BoardPiece, ChessPieces, Move, SquaresToEdge, MoveType};
+use crate::types::{BoardPiece, ChessPieces, Move, MoveType, PieceColor, SquaresToEdge};
 
 pub fn generate_sliding_pieces(
     start_square: usize,
@@ -19,8 +19,6 @@ pub fn generate_sliding_pieces(
         ChessPieces::Rooks => (0, 4),
         _ => (0, 8),
     };
-
-    let mut pierced_pieces = 0;
 
     for direction_index in start_direction_index..end_direction_index {
         for n in 0..sqs_to_edge[start_square][direction_index] {
@@ -53,4 +51,54 @@ pub fn generate_sliding_pieces(
             }
         }
     }
+}
+
+pub fn find_pinned_pieces_in_square(
+    board: &[BoardPiece; 64],
+    start_square: usize,
+    sqs_to_edge: &SquaresToEdge,
+) -> Vec<(i16, ChessPieces, PieceColor)> {
+    let start_piece = &board[start_square];
+    let direction_offsets: [i16; 8] = [
+        8, -8, -1, 1, // Up, Down, Left, Right
+        7, -7, 9, -9, // Diagonals
+    ];
+    let (start_direction_index, end_direction_index) = match start_piece.0 {
+        ChessPieces::Queens => (0, 8),
+        ChessPieces::Bishops => (4, 8),
+        ChessPieces::Rooks => (0, 4),
+        _ => (0, 8),
+    };
+    // (piece direction, ..., ...)
+    //
+    // embed direction_offsets into this.
+    let mut pinned_pieces: Vec<(i16, ChessPieces, PieceColor)> = Vec::new();
+
+    for direction_index in start_direction_index..end_direction_index { // 8
+        let mut path: Vec<(i16, ChessPieces, PieceColor)> = Vec::with_capacity(16);
+        for n in 0..sqs_to_edge[start_square][direction_index] { // 8
+            let target_square = start_square as i16 + direction_offsets[direction_index] * (n + 1);
+            if let Some(target_piece) = board.get(target_square as usize) {
+                if target_piece.0 != ChessPieces::Empty
+                    && target_piece.0 != ChessPieces::Kings
+                    && target_piece.1 != start_piece.1
+                {
+                    path.push((
+                        direction_offsets[direction_index],
+                        target_piece.0,
+                        target_piece.1,
+                    ));
+                    if path.len() > 1 {
+                        break;
+                    }
+                }
+                if target_piece.0 == ChessPieces::Kings && target_piece.1 != start_piece.1 {
+                    pinned_pieces.extend(path.drain(..));
+                    break;
+                }
+            }
+        }
+    }
+
+    pinned_pieces
 }

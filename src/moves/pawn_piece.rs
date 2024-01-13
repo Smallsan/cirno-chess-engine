@@ -1,5 +1,5 @@
 use crate::color::is_opponent_color;
-use crate::types::{BoardPiece, ChessPieces, Move, PieceColor, MoveType};
+use crate::types::{BoardPiece, ChessPieces, Move, MoveType, PieceColor};
 
 /*
  * Promotion left.

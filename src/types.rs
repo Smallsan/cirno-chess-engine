@@ -27,12 +27,12 @@ pub enum PieceColor {
 pub enum MoveType {
     Castle,
     NoCapture, // pawns can't capture forwards, only diagonal forwards.
-                // this enum describes this rule pawns have
+    // this enum describes this rule pawns have
     EnPassant,
     Promotion,
 
     Piercing, // useful for deteching pins.
-              // it can go through 2 pieces.
+    // it can go through 2 pieces.
     #[default]
     Normal, // piece can capture.
 }
@@ -63,7 +63,7 @@ impl Default for ChessState {
             board: [(ChessPieces::Empty, PieceColor::None); 64],
             color_to_move: PieceColor::Black,
             is_able_to_castle: Default::default(),
-            pinned_pieces: vec![]
+            pinned_pieces: vec![],
         }
     }
 }

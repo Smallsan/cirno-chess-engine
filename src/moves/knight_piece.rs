@@ -1,11 +1,7 @@
 use crate::helpers::color::*;
 use crate::types::{BoardPiece, Move, MoveType};
 
-pub fn generate_knight_moves(
-    start_square: usize,
-    board: &[BoardPiece; 64],
-    moves: &mut Vec<Move>,
-) {
+pub fn generate_knight_moves(start_square: usize, board: &[BoardPiece; 64], moves: &mut Vec<Move>) {
     let knight_moves = [
         (-1, -2),
         (-2, -1),

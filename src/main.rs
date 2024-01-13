@@ -26,8 +26,8 @@ mod helpers;
 mod moves;
 mod types;
 
-
 use crate::helpers::*;
+use crate::moves::sliding_piece::find_pinned_pieces_in_square;
 use crate::moves::*;
 use crate::types::*;
 use std::time::Instant;
@@ -38,7 +38,9 @@ use std::time::Instant;
 //      - Promotions
 // King
 //      - King Checks (In Progress)
+//          - Restricting movement to only the king.
 //      - King Pins
+//          - Restricting allowed movement of the pinned piece.
 //
 // Loop over pieces instead of the entire board.
 // Algebraic Notation for User Input
@@ -56,14 +58,14 @@ fn main() {
         "rnbq1bnr/pppppppp/8/8/2k1Q3/8/PPPP1PPP/RNB1KBNR w KQ - 0 1",
         "8/8/8/8/2k1Q3/8/8/8 w - 0 1",
         "8/8/8/8/2k1Q3/8/8/2R5 b",
-        "8/8/3B4/8/2k1Q3/6B1/8/2R5 w"
+        "8/8/3B4/8/2k1Q3/6B1/8/2R5 w",
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
     let before = Instant::now();
     for fen in check {
-        let fen_state = match fen::load_fen_state(fen.to_string(), &squares_to_edge) {
+        let fen_state = match fen::load_fen_state(fen.to_string()) {
             Ok(state) => state,
             Err(err) => {
                 println!("Error! {}", err);
@@ -78,57 +80,59 @@ fn main() {
             &squares_to_edge,
         );
         // detect check and pinned here.
-        detect_check(&fen_state.board, &friendly_movements);
+        let has_check = detect_check(&fen_state.board, &friendly_movements);
+        let pinned_pieces =
+            find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
+        let friendly_movements = if let Some(has_check) = has_check {
+            for piece_index in 0..64 {
+                let piece = &fen_state.board[piece_index as usize];
+                if piece.0 == ChessPieces::Kings {
+                    return friendly_movements.iter().filter(|moves| moves.start_square == piece_index).collect();
+                }
+            }
+            friendly_movements
+        } else {
+            friendly_movements
+        };
+        
         display::display_chess_tui(&fen_state, &friendly_movements);
     }
     println!("Elapsed time: {:.2?}", before.elapsed());
 }
 
-/*
-     I have an idea.
-
-     When the pieces' movement hits a piece, it should stop there.
-        But when we're searching for pins, we should continue on from the stopped movement.
-        like:
-        [k%][  ][  ][  ][  ] // stop when it hits another piece, check if that piece is a king or not.
-        [  ][ %][  ][  ][  ]
-        [  ][  ][N*][  ][  ] // movement should stop here, but piercing (%) continues on from this point.
-        [  ][  ][  ][ *][  ]
-        [  ][  ][  ][  ][B ]
-        [  ][  ][  ][  ][B ]
-        [  ][  ][  ][  ][B ]
-        [  ][  ][  ][  ][B ]
-*/
-fn get_pinned_pieces(board: &[BoardPiece; 64], movement: &Vec<Move>, sqs_to_edge: &SquaresToEdge) {
-    let pinned_pieces_index: Vec<i16> = vec![];
-
+fn find_pinned_pieces_in_board(
+    board: &[BoardPiece; 64],
+    movement: &Vec<Move>,
+    sqs_to_edge: &SquaresToEdge,
+) -> Vec<(i16, ChessPieces, PieceColor)> {
+    let mut pinned_pieces: Vec<(i16, ChessPieces, PieceColor)> = vec![];
     for moves in movement {
-        let start_piece = board[moves.start_square as usize];
-        let target_piece = board[moves.target_square as usize];
-        // matching rooks, queens, bishops and regenerating their moves, except there won't be
-        // anything holding them back (until like 2 pierces have passed.)
-        if matches!(start_piece.0, ChessPieces::Rooks | ChessPieces::Queens | ChessPieces::Bishops) {
-            // generating sliding piece moves
-            let mut sliding_moves: Vec<Move> = vec![];
-            moves::sliding_piece::generate_sliding_pieces(moves.start_square as usize, board, &mut sliding_moves, sqs_to_edge)
+        if matches!(
+            board[moves.start_square as usize].0,
+            ChessPieces::Rooks | ChessPieces::Queens | ChessPieces::Bishops
+        ) {
+            let mut pinned =
+                find_pinned_pieces_in_square(board, moves.start_square as usize, sqs_to_edge);
+            pinned_pieces.extend(pinned.drain(..));
         }
     }
+    pinned_pieces
 }
 
-fn detect_check(board: &[BoardPiece; 64], movement: &Vec<Move>) {
+fn detect_check(board: &[BoardPiece; 64], movement: &Vec<Move>) -> Option<(usize, usize)> {
     let mut position = 0;
     for start_square in board {
-        if let Some(king_piece_move) = movement.iter().find(|moves| 
-                                                                &board[moves.start_square as usize] == start_square 
-                                                                    && board[moves.target_square as usize].0 == ChessPieces::Kings 
-                                                                    && !color::is_color(&board[moves.target_square as usize].1, &start_square.1)
-                                                                    && moves.move_type != MoveType::NoCapture
-                                                            ) 
-        {
-            println!("Start: {:?}, Target: {:?}", board[position as usize], board[king_piece_move.target_square as usize]);
+        if let Some(king_piece_move) = movement.iter().find(|moves| {
+            &board[moves.start_square as usize] == start_square
+                && board[moves.target_square as usize].0 == ChessPieces::Kings
+                && !color::is_color(&board[moves.target_square as usize].1, &start_square.1)
+                && moves.move_type != MoveType::NoCapture
+        }) {
+            return Some((position as usize, king_piece_move.target_square as usize));
         }
         position += 1;
     }
+    None
 }
 
 /**
@@ -155,11 +159,9 @@ fn generate_moves(
                         &mut moves,
                         is_able_to_castle,
                     ),
-                    ChessPieces::Knights => knight_piece::generate_knight_moves(
-                        start_square,
-                        board,
-                        &mut moves,
-                    ),
+                    ChessPieces::Knights => {
+                        knight_piece::generate_knight_moves(start_square, board, &mut moves)
+                    }
                     ChessPieces::Bishops | ChessPieces::Queens | ChessPieces::Rooks => {
                         sliding_piece::generate_sliding_pieces(
                             start_square,

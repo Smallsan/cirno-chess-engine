@@ -1,18 +1,17 @@
-use crate::types::{BoardPiece, ChessPieces, PieceColor, ChessState, Castle, SquaresToEdge};
+use crate::types::{BoardPiece, Castle, ChessPieces, ChessState, PieceColor, SquaresToEdge};
 use std::collections::HashMap;
 
 /**
  * Doesn't support the entire FEN string yet. Castling doesn't work yet.
  */
-pub fn load_fen_state(fen: String, sqs_to_edge: &SquaresToEdge) -> Result<ChessState, &'static str> {
-    let fen: Vec<&str> = fen
-        .trim()
-        .split_whitespace()
-        .collect();
+pub fn load_fen_state(
+    fen: String,
+) -> Result<ChessState, &'static str> {
+    let fen: Vec<&str> = fen.trim().split_whitespace().collect();
     if fen.len() < 2 {
         return Err("Invalid FEN string");
     }
-    
+
     let board = if let Some(fen_board) = fen.get(0) {
         load_position_from_fen(fen_board.to_string())?
     } else {
@@ -22,7 +21,10 @@ pub fn load_fen_state(fen: String, sqs_to_edge: &SquaresToEdge) -> Result<ChessS
     let mut state = ChessState {
         board,
         color_to_move: PieceColor::None,
-        is_able_to_castle: Castle { queenside: false, kingside: false },
+        is_able_to_castle: Castle {
+            queenside: false,
+            kingside: false,
+        },
         pinned_pieces: vec![],
     };
 
@@ -30,7 +32,7 @@ pub fn load_fen_state(fen: String, sqs_to_edge: &SquaresToEdge) -> Result<ChessS
         match i {
             0 => state.color_to_move = parse_turn(part)?,
             1 => state.is_able_to_castle = parse_castle(part, state.color_to_move)?,
-            _ => {},
+            _ => {}
         }
     }
     Ok(state)
