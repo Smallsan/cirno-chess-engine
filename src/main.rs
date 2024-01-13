@@ -26,9 +26,11 @@ mod helpers;
 mod moves;
 mod types;
 
+
 use crate::helpers::*;
 use crate::moves::*;
 use crate::types::*;
+use std::time::Instant;
 
 // TODO
 // Pawn Pieces
@@ -59,6 +61,7 @@ fn main() {
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
+    let before = Instant::now();
     for fen in check {
         let fen_state = match fen::load_fen_state(fen.to_string(), &squares_to_edge) {
             Ok(state) => state,
@@ -78,6 +81,7 @@ fn main() {
         detect_check(&fen_state.board, &friendly_movements);
         display::display_chess_tui(&fen_state, &friendly_movements);
     }
+    println!("Elapsed time: {:.2?}", before.elapsed());
 }
 
 /*
@@ -91,7 +95,25 @@ fn main() {
         [  ][  ][N*][  ][  ] // movement should stop here, but piercing (%) continues on from this point.
         [  ][  ][  ][ *][  ]
         [  ][  ][  ][  ][B ]
+        [  ][  ][  ][  ][B ]
+        [  ][  ][  ][  ][B ]
+        [  ][  ][  ][  ][B ]
 */
+fn get_pinned_pieces(board: &[BoardPiece; 64], movement: &Vec<Move>, sqs_to_edge: &SquaresToEdge) {
+    let pinned_pieces_index: Vec<i16> = vec![];
+
+    for moves in movement {
+        let start_piece = board[moves.start_square as usize];
+        let target_piece = board[moves.target_square as usize];
+        // matching rooks, queens, bishops and regenerating their moves, except there won't be
+        // anything holding them back (until like 2 pierces have passed.)
+        if matches!(start_piece.0, ChessPieces::Rooks | ChessPieces::Queens | ChessPieces::Bishops) {
+            // generating sliding piece moves
+            let mut sliding_moves: Vec<Move> = vec![];
+            moves::sliding_piece::generate_sliding_pieces(moves.start_square as usize, board, &mut sliding_moves, sqs_to_edge)
+        }
+    }
+}
 
 fn detect_check(board: &[BoardPiece; 64], movement: &Vec<Move>) {
     let mut position = 0;

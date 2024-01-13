@@ -20,6 +20,8 @@ pub fn generate_sliding_pieces(
         _ => (0, 8),
     };
 
+    let mut pierced_pieces = 0;
+
     for direction_index in start_direction_index..end_direction_index {
         for n in 0..sqs_to_edge[start_square][direction_index] {
             // loops through the "directions"
@@ -52,4 +54,3 @@ pub fn generate_sliding_pieces(
         }
     }
 }
-

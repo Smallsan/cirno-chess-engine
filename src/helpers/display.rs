@@ -33,7 +33,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
                 MoveType::Castle => "&",
                 MoveType::EnPassant => "x",
                 MoveType::Promotion => "!",
-                MoveType::Pinned => "?",
+                MoveType::Piercing => "?",
             }
         } else {
             " "

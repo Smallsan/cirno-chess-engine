@@ -31,7 +31,8 @@ pub enum MoveType {
     EnPassant,
     Promotion,
 
-    Pinned,
+    Piercing, // useful for deteching pins.
+              // it can go through 2 pieces.
     #[default]
     Normal, // piece can capture.
 }
