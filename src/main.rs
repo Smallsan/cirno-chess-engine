@@ -86,9 +86,9 @@ fn main() {
      When the pieces' movement hits a piece, it should stop there.
         But when we're searching for pins, we should continue on from the stopped movement.
         like:
-        [k ][  ][  ][  ][  ] // stop when it hits another piece, check if that piece is a king or not.
-        [  ][ *][  ][  ][  ]
-        [  ][  ][N*][  ][  ] // movement should stop here, but piercing continues on from this point.
+        [k%][  ][  ][  ][  ] // stop when it hits another piece, check if that piece is a king or not.
+        [  ][ %][  ][  ][  ]
+        [  ][  ][N*][  ][  ] // movement should stop here, but piercing (%) continues on from this point.
         [  ][  ][  ][ *][  ]
         [  ][  ][  ][  ][B ]
 */
