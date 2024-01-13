@@ -1,5 +1,5 @@
-
 pub type BoardPiece = (ChessPieces, PieceColor);
+pub type SquaresToEdge = [[i16; 8]; 64];
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum ChessPieces {
@@ -14,30 +14,46 @@ pub enum ChessPieces {
     Empty,
 }
 
-pub type SquaresToEdge = [[i16; 8]; 64];
-
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum PieceColor {
-    White, Black, 
+    White,
+    Black,
+
     #[default]
-    None
+    None,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub enum MoveType {
+    Castle,
+    NoCapture, // pawns can't capture forwards, only diagonal forwards.
+                // this enum describes this rule pawns have
+    EnPassant,
+    Promotion,
+
+    Pinned,
+    #[default]
+    Normal, // piece can capture.
 }
 
 #[derive(Clone, Copy, Debug)]
 pub struct Move {
     pub start_square: i16,
     pub target_square: i16,
+    pub move_type: MoveType,
 }
 
 pub struct ChessState {
     pub board: [BoardPiece; 64],
     pub color_to_move: PieceColor,
     pub is_able_to_castle: Castle,
+    pub pinned_pieces: Vec<BoardPiece>,
 }
 
+#[derive(Debug, Default)]
 pub struct Castle {
-    pub white: bool,
-    pub black: bool,
+    pub queenside: bool,
+    pub kingside: bool,
 }
 
 impl Default for ChessState {
@@ -45,7 +61,8 @@ impl Default for ChessState {
         ChessState {
             board: [(ChessPieces::Empty, PieceColor::None); 64],
             color_to_move: PieceColor::Black,
-            is_able_to_castle: Castle { white: true, black: true },
+            is_able_to_castle: Default::default(),
+            pinned_pieces: vec![]
         }
     }
 }
