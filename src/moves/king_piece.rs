@@ -1,6 +1,6 @@
 use crate::color::is_opponent_color;
 use crate::helpers::color::is_color;
-use crate::types::{BoardPiece, Castle, ChessPieces, Move, MoveType, PieceColor};
+use crate::types::{BoardPiece, Castle, ChessPieces, Move, MoveType};
 
 /**
  * King:

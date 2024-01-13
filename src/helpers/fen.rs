@@ -1,10 +1,10 @@
-use crate::types::{BoardPiece, ChessPieces, PieceColor, ChessState, Castle};
+use crate::types::{BoardPiece, ChessPieces, PieceColor, ChessState, Castle, SquaresToEdge};
 use std::collections::HashMap;
 
 /**
  * Doesn't support the entire FEN string yet. Castling doesn't work yet.
  */
-pub fn load_fen_state(fen: String) -> Result<ChessState, &'static str> {
+pub fn load_fen_state(fen: String, sqs_to_edge: &SquaresToEdge) -> Result<ChessState, &'static str> {
     let fen: Vec<&str> = fen
         .trim()
         .split_whitespace()
@@ -14,7 +14,7 @@ pub fn load_fen_state(fen: String) -> Result<ChessState, &'static str> {
     }
     
     let board = if let Some(fen_board) = fen.get(0) {
-        load_position_from_fen(fen_board.to_string()) 
+        load_position_from_fen(fen_board.to_string())?
     } else {
         [(ChessPieces::Empty, PieceColor::None); 64]
     };
@@ -23,48 +23,45 @@ pub fn load_fen_state(fen: String) -> Result<ChessState, &'static str> {
         board,
         color_to_move: PieceColor::None,
         is_able_to_castle: Castle { queenside: false, kingside: false },
+        pinned_pieces: vec![],
     };
 
     for (i, &part) in fen.iter().skip(1).enumerate() {
         match i {
-            0 => state.color_to_move = parse_turn(part),
-            1 => state.is_able_to_castle = parse_castle(part).unwrap(),
-            _ => return Err("Invalid/Unimplemented FEN string")
+            0 => state.color_to_move = parse_turn(part)?,
+            1 => state.is_able_to_castle = parse_castle(part, state.color_to_move)?,
+            _ => {},
         }
     }
     Ok(state)
 }
 
-fn parse_turn(part: &str) -> PieceColor {
-    match part.chars().nth(0).unwrap() {
-        'w' => PieceColor::White,
-        'b' => PieceColor::Black,
-        _ => PieceColor::None,
+fn parse_turn(part: &str) -> Result<PieceColor, &'static str> {
+    match part.chars().nth(0).unwrap_or_else(|| 'm') {
+        'w' => Ok(PieceColor::White),
+        'b' => Ok(PieceColor::Black),
+        _ => Err("Wrong input for turns."),
     }
 }
 
-fn parse_castle(part: &str) -> Result<Castle, &'static str> {
+fn parse_castle(part: &str, color: PieceColor) -> Result<Castle, &'static str> {
     let mut castle = Castle {
         queenside: false,
         kingside: false,
     };
 
     for char in part.chars() {
-        match char {
-            'Q' | 'q' => {
-                castle.queenside = true;
-            }
-            'K' | 'k' => {
-                castle.kingside = true;
-            }
-            _ => return Err("Wrong input for Castles."),
+        if char == 'Q' && color == PieceColor::White || char == 'q' && color == PieceColor::Black {
+            castle.queenside = true;
+        }
+        if char == 'K' && color == PieceColor::White || char == 'k' && color == PieceColor::Black {
+            castle.kingside = true;
         }
     }
-    
     Ok(castle)
 }
 
-fn load_position_from_fen(fen: String) -> [BoardPiece; 64] {
+fn load_position_from_fen(fen: String) -> Result<[BoardPiece; 64], &'static str> {
     let mut board = [(ChessPieces::Empty, PieceColor::None); 64];
     let piece_type_from_symbol: HashMap<char, BoardPiece> = HashMap::from([
         ('r', (ChessPieces::Rooks, PieceColor::Black)),
@@ -100,5 +97,5 @@ fn load_position_from_fen(fen: String) -> [BoardPiece; 64] {
             }
         }
     }
-    board
+    Ok(board)
 }

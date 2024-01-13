@@ -43,6 +43,7 @@ pub fn generate_knight_moves(
                     target_square,
                     move_type: MoveType::Normal,
                 };
+                moves.push(movement);
             }
         }
     }

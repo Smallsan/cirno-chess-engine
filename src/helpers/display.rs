@@ -1,4 +1,6 @@
-use crate::types::{BoardPiece, Castle, ChessPieces, ChessState, Move, MoveType, PieceColor};
+use std::str::{from_utf8, from_utf8_unchecked};
+
+use crate::types::{BoardPiece, ChessPieces, ChessState, Move, MoveType, PieceColor};
 
 pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
     let turn_color = match state.color_to_move {
@@ -20,8 +22,8 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
         };
 
         let mut castling_moves = find_castling_moves(movement);
-
-        castling_moves.extend(movement);
+        castling_moves.extend(movement); // dirty hack by Small <3
+                                         // Queens don't get displayed for no reason without this.
 
         let move_str = if let Some(mo) = castling_moves.iter().find(|x| x.target_square == position)
         {
@@ -31,6 +33,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
                 MoveType::Castle => "&",
                 MoveType::EnPassant => "x",
                 MoveType::Promotion => "!",
+                MoveType::Pinned => "?",
             }
         } else {
             " "

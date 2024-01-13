@@ -31,6 +31,7 @@ pub enum MoveType {
     EnPassant,
     Promotion,
 
+    Pinned,
     #[default]
     Normal, // piece can capture.
 }
@@ -46,6 +47,7 @@ pub struct ChessState {
     pub board: [BoardPiece; 64],
     pub color_to_move: PieceColor,
     pub is_able_to_castle: Castle,
+    pub pinned_pieces: Vec<BoardPiece>,
 }
 
 #[derive(Debug, Default)]
@@ -60,6 +62,7 @@ impl Default for ChessState {
             board: [(ChessPieces::Empty, PieceColor::None); 64],
             color_to_move: PieceColor::Black,
             is_able_to_castle: Default::default(),
+            pinned_pieces: vec![]
         }
     }
 }

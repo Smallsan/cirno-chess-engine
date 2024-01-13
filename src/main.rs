@@ -35,19 +35,32 @@ use crate::types::*;
 //      - En Passant
 //      - Promotions
 // King
-//      - Castling (FEN strings)
-//      - King Pins (In Progress)
+//      - King Checks (In Progress)
+//      - King Pins
+//
+// Loop over pieces instead of the entire board.
 // Algebraic Notation for User Input
 fn main() {
-    let fens = vec![
-        "8/8/8/8/2r1P1K1/8/8/8",
-        "8/8/8/8/8/4p3/3P1P2/8",
-        "8/8/8/8/8/3npb2/3P1P2/8"
+    let _pawn = vec![
+        "8/8/8/8/2r1P1K1/8/8/8 w",
+        "8/8/8/8/8/4p3/3P1P2/8 b",
+        "8/8/8/8/8/3npb2/3P1P2/8 w",
+    ];
+    let castling = vec![
+        "rnbqk2r/ppp5/8/8/8/8/P7/R2QKBNR b KQkq - 0 1",
+        "rnbqk2r/ppp5/8/8/8/8/P7/R3K2R w KQkq - 0 1",
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
-    for fen in fens {
-        let fen_state = fen::load_fen_state(fen.to_string()).unwrap();
+
+    for fen in castling {
+        let fen_state = match fen::load_fen_state(fen.to_string(), &squares_to_edge) {
+            Ok(state) => state,
+            Err(err) => {
+                println!("Error! {}", err);
+                break;
+            }
+        };
 
         let friendly_movements = generate_moves(
             &fen_state.board,
@@ -55,6 +68,8 @@ fn main() {
             &fen_state.is_able_to_castle,
             &squares_to_edge,
         );
+        // detect check and pinned here.
+        // friendly_movements.iter().filter(|moves| moves.move_type == types::MoveType::Normal);
         display::display_chess_tui(&fen_state, &friendly_movements);
     }
 }
