@@ -1,4 +1,4 @@
-use crate::{BoardPiece, PieceColor, Castle};
+use crate::{BoardPiece, PieceColor, Castle, Move};
 
 #[derive(Debug)]
 pub struct ChessState {
@@ -9,12 +9,22 @@ pub struct ChessState {
     pub pinned_pieces: Vec<BoardPiece>,
 }
 
-impl ChessState {
-    fn move_piece(notation: &str) {
-        algebraic_notation_decoder(notation);
+fn move_piece(board: &mut [BoardPiece; 64], friendly_movements: &Vec<Move>, notation: &str) -> Result<bool, &'static str> {
+    let square_index = algebraic_notation_decoder(notation);
+    let moves = friendly_movements.iter().find(|moves| (moves.start_square as u32, moves.target_square as u32) == square_index);
+    match moves {
+        Some(_) => {
+            board[square_index.1 as usize] = board[square_index.0 as usize];
+            board[square_index.0 as usize] = BoardPiece {
+                ..Default::default() // Empty.
+            };
+            Ok(true)
+        },
+        None => {
+            Err("Move not allowed.")
+        }
     }
 }
-
 fn algebraic_notation_decoder(notation: &str) -> (u32, u32) {
     let (notation_start, notation_end) = notation.split_at(2);
     let start_square_index = convert_algebraic_snippet(notation_start);
