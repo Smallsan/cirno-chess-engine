@@ -8,6 +8,7 @@ use crate::types::{BoardPiece, Castle, ChessPieces, Move, MoveType};
  * - Pins
  *
  */
+
 pub fn generate_king_moves(
     start_square: usize,
     board: &[BoardPiece; 64],
