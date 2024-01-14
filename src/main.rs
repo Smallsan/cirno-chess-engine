@@ -73,7 +73,7 @@ fn main() {
             }
         };
 
-        let (friendly_piece_locations, friendly_movements) = generate_moves(
+        let (friendly_piece_locations, mut friendly_movements) = generate_moves(
             &fen_state.board,
             &fen_state.color_to_move,
             &fen_state.is_able_to_castle,
@@ -106,8 +106,8 @@ fn main() {
             for piece_index in 0..64 {
                 let piece = &fen_state.board[piece_index as usize];
                 if piece.piece_type == ChessPieces::Kings {
+                    cull_king_moves(&mut friendly_movements, &enemy_movements);
                     king_movement = restrict_king(&friendly_movements, &fen_state.board, true);
-                    cull_king_moves(&fen_state.board, &friendly_movements, &enemy_movements);
                 }
             }
             king_movement
@@ -190,30 +190,12 @@ fn restrict_king(
     king_movements
 }
 
-fn cull_king_moves(
-    board: &[BoardPiece; 64],
-    friendly_movements: &Vec<Move>,
-    enemy_movements: &Vec<Move>,
-) -> Vec<Move> {
-    let mut movements = Vec::new();
-
-    // FUCKCNSDLVKNDSLJVNDSKLCM
-    //
-    // How do you remove the king moves that the opponent moves intersect with???
-    let mut king_index = 0;
-
-    for king_movement in friendly_movements {
-        let enemy_m: Vec<_> = enemy_movements
+fn cull_king_moves(friendly_king_movements: &mut Vec<Move>, enemy_movements: &Vec<Move>) {
+    friendly_king_movements.retain(|king_movement| {
+        !enemy_movements
             .iter()
-            // filtering out the moves that the king has (BROKEN)
-            .filter(|enemy_move| king_movement.target_square == enemy_move.target_square)
-            .collect();
-        friendly_movements.remove(king_index);
-        king_index += 1;
-    }
-    movements.extend(king_m);
-
-    movements
+            .any(|enemy_move| king_movement.target_square == enemy_move.target_square)
+    });
 }
 
 /**
