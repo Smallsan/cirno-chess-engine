@@ -26,6 +26,8 @@ mod helpers;
 mod moves;
 mod types;
 
+use helpers::color::is_opponent_color;
+
 use crate::helpers::*;
 use crate::moves::sliding_piece::find_pinned_pieces_in_square;
 use crate::moves::*;
@@ -58,7 +60,8 @@ fn main() {
         "8/8/8/8/2k1Q3/8/8/2R5 b",
         "4r3/8/8/8/8/8/8/R3K2R w KQha - 0 1",
         "k7/3Q4/8/2R5/8/8/8/8 b - - 0 1",
-        "8/pppppppp/8/3K4/8/8/PPPPPPPP/8 b HAha - 0 1"
+        "8/pppppppp/8/3K1P2/8/8/2r5/8 b HAha - 0 1",
+        "8/pppppppp/8/3K1P2/8/8/2r5/8 w HAha - 0 1"
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
@@ -97,8 +100,8 @@ fn main() {
         let pinned_pieces =
             find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
 
-        cull_king_moves(&mut friendly_movements, &enemy_movements);
         // king restriction.
+        cull_king_moves(&mut friendly_movements, &enemy_movements);
         let friendly_movements = if let Some(checks) = has_check {
             for check in checks {
                 println!("{:?}", &fen_state.board[check.start_square as usize]);

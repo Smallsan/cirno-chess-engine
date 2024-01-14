@@ -31,8 +31,7 @@ pub enum PieceColor {
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum MoveType {
     Castle,
-    NoCapture, // pawns can't capture forwards, only diagonal forwards.
-    // this enum describes this rule pawns have
+    NoCapture,
     EnPassant,
     Promotion,
 

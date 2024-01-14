@@ -26,7 +26,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
         let move_str = if let Some(mo) = castling_moves.iter().find(|x| x.target_square == position)
         {
             match mo.move_type {
-                MoveType::NoCapture => "^",
+                MoveType::NoCapture => "%",
                 MoveType::Normal => "*",
                 MoveType::Castle => "&",
                 MoveType::EnPassant => "x",

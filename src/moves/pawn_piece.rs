@@ -51,15 +51,15 @@ pub fn generate_pawn_moves(
             }
 
             // eating the pieces.
+            //
+            // change this to a pawn capture instead of a nocapture
             if matches!(direction_offset, -7 | 7 | -9 | 9) {
-                if is_opponent_color(&target_piece.piece_color, current_player_color) {
-                    let movement = Move {
-                        start_square: start_square as i16,
-                        target_square,
-                        move_type: MoveType::Normal,
-                    };
-                    moves.push(movement);
-                }
+                let movement = Move {
+                    start_square: start_square as i16,
+                    target_square,
+                    move_type: MoveType::Normal,
+                };
+                moves.push(movement);
             }
         }
     }
