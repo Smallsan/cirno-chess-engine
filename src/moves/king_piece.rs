@@ -65,19 +65,20 @@ pub fn generate_king_moves(
                 continue;
             }
 
-            moves.push(Move {
-                start_square: start_square as i16,
-                target_square,
-                move_type: MoveType::Normal,
-            });
-
             if is_opponent_color(&target_piece.piece_color, &start_piece.piece_color) {
                 moves.push(Move {
                     start_square: start_square as i16,
                     target_square,
                     move_type: MoveType::Normal,
                 });
+                continue;
             }
+
+            moves.push(Move {
+                start_square: start_square as i16,
+                target_square,
+                move_type: MoveType::Normal,
+            });
         }
     }
 }

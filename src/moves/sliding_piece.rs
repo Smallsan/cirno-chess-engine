@@ -32,13 +32,6 @@ pub fn generate_sliding_pieces(
                     break;
                 }
 
-                let movements = Move {
-                    start_square: start_square as i16,
-                    target_square,
-                    move_type: MoveType::Normal,
-                };
-                moves.push(movements);
-
                 if is_opponent_color(&target_piece.piece_color, &start_piece.piece_color) {
                     let movement = Move {
                         start_square: start_square as i16,
@@ -48,6 +41,13 @@ pub fn generate_sliding_pieces(
                     moves.push(movement);
                     break;
                 }
+
+                let movements = Move {
+                    start_square: start_square as i16,
+                    target_square,
+                    move_type: MoveType::Normal,
+                };
+                moves.push(movements);
             }
         }
     }

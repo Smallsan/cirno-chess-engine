@@ -26,13 +26,6 @@ pub fn generate_knight_moves(start_square: usize, board: &[BoardPiece; 64], move
                 continue;
             }
 
-            let movement = Move {
-                start_square: start_square as i16,
-                target_square: target_square as i16,
-                move_type: MoveType::Normal,
-            };
-            moves.push(movement);
-
             if is_opponent_color(&target_piece.piece_color, &board[start_square].piece_color) {
                 let movement = Move {
                     start_square: start_square as i16,
@@ -40,7 +33,15 @@ pub fn generate_knight_moves(start_square: usize, board: &[BoardPiece; 64], move
                     move_type: MoveType::Normal,
                 };
                 moves.push(movement);
+                continue;
             }
+
+            let movement = Move {
+                start_square: start_square as i16,
+                target_square: target_square as i16,
+                move_type: MoveType::Normal,
+            };
+            moves.push(movement);
         }
     }
 }
