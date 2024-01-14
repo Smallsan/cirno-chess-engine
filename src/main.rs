@@ -55,10 +55,7 @@ fn main() {
         "rnbqk2r/ppp5/8/8/8/8/P7/R3K2R w KQkq - 0 1",
     ];
     let check = vec![
-        "rnbq1bnr/pppppppp/8/8/2k1Q3/8/PPPP1PPP/RNB1KBNR w KQ - 0 1",
-        "8/8/8/8/2k1Q3/8/8/8 w - 0 1",
         "8/8/8/8/2k1Q3/8/8/2R5 b",
-        "8/8/3B4/8/2k1Q3/6B1/8/2R5 w",
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
@@ -73,28 +70,47 @@ fn main() {
             }
         };
 
-        let friendly_movements = generate_moves(
+        let (friendly_piece_locations, friendly_movements) = generate_moves(
             &fen_state.board,
             &fen_state.color_to_move,
             &fen_state.is_able_to_castle,
             &squares_to_edge,
         );
+        let (enemy_piece_locations, enemy_movements) = generate_moves(
+            &fen_state.board,
+            match &fen_state.color_to_move {
+                PieceColor::White => &PieceColor::Black,
+                PieceColor::Black => &PieceColor::White,
+                PieceColor::None => &PieceColor::White, // this will never happen so its safe to
+                                                        // ignore it.
+            },
+            &fen_state.is_able_to_castle,
+            &squares_to_edge,
+        );
+        // checks and pins will rely on the move gen of the other side.
+
         // detect check and pinned here.
-        let has_check = detect_check(&fen_state.board, &friendly_movements);
+        let has_check = detect_check(&friendly_piece_locations, &enemy_movements);
         let pinned_pieces =
             find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
-        let friendly_movements = if let Some(has_check) = has_check {
+
+        // king restriction.
+        let friendly_movements = if let Some(checks) = has_check {
+            for check in checks {
+                println!("{:?}", &fen_state.board[check.start_square as usize]);
+            }
+
             for piece_index in 0..64 {
                 let piece = &fen_state.board[piece_index as usize];
-                if piece.0 == ChessPieces::Kings {
-                    return friendly_movements.iter().filter(|moves| moves.start_square == piece_index).collect();
+                if piece.piece_type == ChessPieces::Kings {
+                    restrict_only_to_king(&friendly_movements, &fen_state.board);
                 }
             }
             friendly_movements
         } else {
             friendly_movements
         };
-        
+
         display::display_chess_tui(&fen_state, &friendly_movements);
     }
     println!("Elapsed time: {:.2?}", before.elapsed());
@@ -108,7 +124,7 @@ fn find_pinned_pieces_in_board(
     let mut pinned_pieces: Vec<(i16, ChessPieces, PieceColor)> = vec![];
     for moves in movement {
         if matches!(
-            board[moves.start_square as usize].0,
+            board[moves.start_square as usize].piece_type,
             ChessPieces::Rooks | ChessPieces::Queens | ChessPieces::Bishops
         ) {
             let mut pinned =
@@ -119,20 +135,47 @@ fn find_pinned_pieces_in_board(
     pinned_pieces
 }
 
-fn detect_check(board: &[BoardPiece; 64], movement: &Vec<Move>) -> Option<(usize, usize)> {
-    let mut position = 0;
-    for start_square in board {
-        if let Some(king_piece_move) = movement.iter().find(|moves| {
-            &board[moves.start_square as usize] == start_square
-                && board[moves.target_square as usize].0 == ChessPieces::Kings
-                && !color::is_color(&board[moves.target_square as usize].1, &start_square.1)
-                && moves.move_type != MoveType::NoCapture
-        }) {
-            return Some((position as usize, king_piece_move.target_square as usize));
-        }
-        position += 1;
+/**
+ * Needs the other side's movegen.
+ */
+fn detect_check(
+    friendly_piece_locations: &Vec<(ChessPieces, usize)>,
+    enemy_movements: &Vec<Move>, // this is supposed to be Vec<Move>
+) -> Option<Vec<Move>> {
+    // finding the king
+    let king_position = friendly_piece_locations
+        .iter()
+        .find(|x| x.0 == ChessPieces::Kings);
+    if let Some(king_position) = king_position {
+        // finding if the enemy has a movement in the king
+        let mut enemy_intersection = Vec::<Move>::new();
+        let has_enemy_intersection_with_king = enemy_movements
+            .into_iter()
+            .filter(|mov| mov.target_square as usize == king_position.1);
+        enemy_intersection.extend(has_enemy_intersection_with_king);
+        Some(enemy_intersection)
+    } else {
+        None
     }
-    None
+}
+
+/**
+ * Broken since checks need the other side's movegen to function correctly.
+ */
+fn restrict_only_to_king(friendly_movements: &Vec<Move>, board: &[BoardPiece; 64]) -> Vec<Move> {
+    let mut king_movements = Vec::new();
+
+    for piece_index in 0..64 {
+        let piece = board[piece_index as usize];
+        if piece.piece_type == ChessPieces::Kings {
+            let move_iter = friendly_movements.iter();
+            let filtered = move_iter.filter(|moves| moves.start_square == piece_index);
+            let result: Vec<_> = filtered.collect();
+            king_movements.extend(result);
+        }
+    }
+
+    king_movements
 }
 
 /**
@@ -143,7 +186,8 @@ fn generate_moves(
     current_player_color: &PieceColor,
     is_able_to_castle: &Castle,
     sqs_to_edge: &SquaresToEdge,
-) -> Vec<Move> {
+) -> (Vec<(ChessPieces, usize)>, Vec<Move>) {
+    let mut pieces = Vec::<(ChessPieces, usize)>::new();
     let mut moves = Vec::<Move>::new();
 
     for start_square in 0..64 {
@@ -151,8 +195,11 @@ fn generate_moves(
         // it scans every square for a piece
         let piece = board.get(start_square);
         if let Some(piece) = piece {
-            if piece.0 != ChessPieces::Empty && color::is_color(&piece.1, current_player_color) {
-                match &piece.0 {
+            if piece.piece_type != ChessPieces::Empty
+                && color::is_color(&piece.piece_color, current_player_color)
+            {
+                pieces.push((piece.piece_type, start_square));
+                match &piece.piece_type {
                     ChessPieces::Kings => king_piece::generate_king_moves(
                         start_square,
                         board,
@@ -182,5 +229,5 @@ fn generate_moves(
         }
     }
 
-    return moves;
+    return (pieces, moves);
 }

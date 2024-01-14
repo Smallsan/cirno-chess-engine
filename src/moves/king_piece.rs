@@ -7,7 +7,6 @@ use crate::types::{BoardPiece, Castle, ChessPieces, Move, MoveType};
  * - Castling (in progress)
  * - Pins
  *
- * make FEN decoder support castling
  */
 pub fn generate_king_moves(
     start_square: usize,
@@ -35,7 +34,7 @@ pub fn generate_king_moves(
     let last_square_of_rank = (start_rank + 1) * 8;
     let rank_range = first_square_of_rank..last_square_of_rank;
     let castle = check_castle_condition(
-        board.map(|f| f.0)[rank_range].try_into().unwrap(),
+        board.map(|f| f.piece_type)[rank_range].try_into().unwrap(),
         is_able_to_castle,
     );
 
@@ -62,7 +61,7 @@ pub fn generate_king_moves(
             let target_square = (new_rank * 8 + new_file) as i16;
             let target_piece = board[target_square as usize];
 
-            if is_color(&start_piece.1, &target_piece.1) {
+            if is_color(&start_piece.piece_color, &target_piece.piece_color) {
                 continue;
             }
 
@@ -72,7 +71,7 @@ pub fn generate_king_moves(
                 move_type: MoveType::Normal,
             });
 
-            if is_opponent_color(&target_piece.1, &start_piece.1) {
+            if is_opponent_color(&target_piece.piece_color, &start_piece.piece_color) {
                 moves.push(Move {
                     start_square: start_square as i16,
                     target_square,

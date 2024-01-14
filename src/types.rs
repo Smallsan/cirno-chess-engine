@@ -1,5 +1,10 @@
-pub type BoardPiece = (ChessPieces, PieceColor);
 pub type SquaresToEdge = [[i16; 8]; 64];
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct BoardPiece {
+    pub piece_type: ChessPieces,
+    pub piece_color: PieceColor,
+}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum ChessPieces {
@@ -60,7 +65,9 @@ pub struct Castle {
 impl Default for ChessState {
     fn default() -> ChessState {
         ChessState {
-            board: [(ChessPieces::Empty, PieceColor::None); 64],
+            board: [BoardPiece {
+                ..Default::default()
+            }; 64],
             color_to_move: PieceColor::Black,
             is_able_to_castle: Default::default(),
             pinned_pieces: vec![],

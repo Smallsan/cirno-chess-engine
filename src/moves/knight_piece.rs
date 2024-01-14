@@ -22,7 +22,7 @@ pub fn generate_knight_moves(start_square: usize, board: &[BoardPiece; 64], move
             let target_square = new_rank * 8 + new_file;
             let target_piece = board[target_square as usize];
 
-            if is_color(&target_piece.1, &board[start_square].1) {
+            if is_color(&target_piece.piece_color, &board[start_square].piece_color) {
                 continue;
             }
 
@@ -33,7 +33,7 @@ pub fn generate_knight_moves(start_square: usize, board: &[BoardPiece; 64], move
             };
             moves.push(movement);
 
-            if is_opponent_color(&target_piece.1, &board[start_square].1) {
+            if is_opponent_color(&target_piece.piece_color, &board[start_square].piece_color) {
                 let movement = Move {
                     start_square: start_square as i16,
                     target_square,

@@ -13,7 +13,7 @@ pub fn generate_sliding_pieces(
         7, -7, 9, -9, // Diagonals
     ];
 
-    let (start_direction_index, end_direction_index) = match start_piece.0 {
+    let (start_direction_index, end_direction_index) = match start_piece.piece_type {
         ChessPieces::Queens => (0, 8),
         ChessPieces::Bishops => (4, 8),
         ChessPieces::Rooks => (0, 4),
@@ -28,7 +28,7 @@ pub fn generate_sliding_pieces(
 
             if let Some(target_piece) = target_piece {
                 // blocked by a friendly piece, don't go further
-                if is_color(&target_piece.1, &start_piece.1) {
+                if is_color(&target_piece.piece_color, &start_piece.piece_color) {
                     break;
                 }
 
@@ -39,7 +39,7 @@ pub fn generate_sliding_pieces(
                 };
                 moves.push(movements);
 
-                if is_opponent_color(&target_piece.1, &start_piece.1) {
+                if is_opponent_color(&target_piece.piece_color, &start_piece.piece_color) {
                     let movement = Move {
                         start_square: start_square as i16,
                         target_square,
@@ -63,7 +63,7 @@ pub fn find_pinned_pieces_in_square(
         8, -8, -1, 1, // Up, Down, Left, Right
         7, -7, 9, -9, // Diagonals
     ];
-    let (start_direction_index, end_direction_index) = match start_piece.0 {
+    let (start_direction_index, end_direction_index) = match start_piece.piece_type {
         ChessPieces::Queens => (0, 8),
         ChessPieces::Bishops => (4, 8),
         ChessPieces::Rooks => (0, 4),
@@ -74,25 +74,29 @@ pub fn find_pinned_pieces_in_square(
     // embed direction_offsets into this.
     let mut pinned_pieces: Vec<(i16, ChessPieces, PieceColor)> = Vec::new();
 
-    for direction_index in start_direction_index..end_direction_index { // 8
+    for direction_index in start_direction_index..end_direction_index {
+        // 8
         let mut path: Vec<(i16, ChessPieces, PieceColor)> = Vec::with_capacity(16);
-        for n in 0..sqs_to_edge[start_square][direction_index] { // 8
+        for n in 0..sqs_to_edge[start_square][direction_index] {
+            // 8
             let target_square = start_square as i16 + direction_offsets[direction_index] * (n + 1);
             if let Some(target_piece) = board.get(target_square as usize) {
-                if target_piece.0 != ChessPieces::Empty
-                    && target_piece.0 != ChessPieces::Kings
-                    && target_piece.1 != start_piece.1
+                if target_piece.piece_type != ChessPieces::Empty
+                    && target_piece.piece_type != ChessPieces::Kings
+                    && target_piece.piece_color != start_piece.piece_color
                 {
                     path.push((
                         direction_offsets[direction_index],
-                        target_piece.0,
-                        target_piece.1,
+                        target_piece.piece_type,
+                        target_piece.piece_color,
                     ));
                     if path.len() > 1 {
                         break;
                     }
                 }
-                if target_piece.0 == ChessPieces::Kings && target_piece.1 != start_piece.1 {
+                if target_piece.piece_type == ChessPieces::Kings
+                    && target_piece.piece_color != start_piece.piece_color
+                {
                     pinned_pieces.extend(path.drain(..));
                     break;
                 }

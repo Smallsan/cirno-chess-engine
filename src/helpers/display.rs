@@ -1,5 +1,3 @@
-use std::str::{from_utf8, from_utf8_unchecked};
-
 use crate::types::{BoardPiece, ChessPieces, ChessState, Move, MoveType, PieceColor};
 
 pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
@@ -56,8 +54,8 @@ fn find_castling_moves(moves: &Vec<Move>) -> Vec<&Move> {
 }
 
 pub fn format_piece(square: BoardPiece) -> String {
-    return match square.1 {
-        PieceColor::White => match square.0 {
+    return match square.piece_color {
+        PieceColor::White => match square.piece_type {
             ChessPieces::Kings => format!("K"),
             ChessPieces::Queens => format!("Q"),
             ChessPieces::Rooks => format!("R"),
@@ -66,7 +64,7 @@ pub fn format_piece(square: BoardPiece) -> String {
             ChessPieces::Pawns => format!("P"),
             ChessPieces::Empty => format!(" "),
         },
-        PieceColor::Black => match square.0 {
+        PieceColor::Black => match square.piece_type {
             ChessPieces::Kings => format!("k"),
             ChessPieces::Queens => format!("q"),
             ChessPieces::Rooks => format!("r"),

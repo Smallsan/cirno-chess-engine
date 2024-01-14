@@ -1,12 +1,10 @@
-use crate::types::{BoardPiece, Castle, ChessPieces, ChessState, PieceColor, SquaresToEdge};
+use crate::types::{BoardPiece, Castle, ChessPieces, ChessState, PieceColor};
 use std::collections::HashMap;
 
 /**
  * Doesn't support the entire FEN string yet. Castling doesn't work yet.
  */
-pub fn load_fen_state(
-    fen: String,
-) -> Result<ChessState, &'static str> {
+pub fn load_fen_state(fen: String) -> Result<ChessState, &'static str> {
     let fen: Vec<&str> = fen.trim().split_whitespace().collect();
     if fen.len() < 2 {
         return Err("Invalid FEN string");
@@ -15,7 +13,7 @@ pub fn load_fen_state(
     let board = if let Some(fen_board) = fen.get(0) {
         load_position_from_fen(fen_board.to_string())?
     } else {
-        [(ChessPieces::Empty, PieceColor::None); 64]
+        [Default::default(); 64]
     };
 
     let mut state = ChessState {
@@ -64,20 +62,92 @@ fn parse_castle(part: &str, color: PieceColor) -> Result<Castle, &'static str> {
 }
 
 fn load_position_from_fen(fen: String) -> Result<[BoardPiece; 64], &'static str> {
-    let mut board = [(ChessPieces::Empty, PieceColor::None); 64];
+    let mut board: [BoardPiece; 64] = [Default::default(); 64];
     let piece_type_from_symbol: HashMap<char, BoardPiece> = HashMap::from([
-        ('r', (ChessPieces::Rooks, PieceColor::Black)),
-        ('n', (ChessPieces::Knights, PieceColor::Black)),
-        ('b', (ChessPieces::Bishops, PieceColor::Black)),
-        ('q', (ChessPieces::Queens, PieceColor::Black)),
-        ('k', (ChessPieces::Kings, PieceColor::Black)),
-        ('p', (ChessPieces::Pawns, PieceColor::Black)),
-        ('R', (ChessPieces::Rooks, PieceColor::White)),
-        ('N', (ChessPieces::Knights, PieceColor::White)),
-        ('B', (ChessPieces::Bishops, PieceColor::White)),
-        ('Q', (ChessPieces::Queens, PieceColor::White)),
-        ('K', (ChessPieces::Kings, PieceColor::White)),
-        ('P', (ChessPieces::Pawns, PieceColor::White)),
+        (
+            'r',
+            BoardPiece {
+                piece_type: ChessPieces::Rooks,
+                piece_color: PieceColor::Black,
+            },
+        ),
+        (
+            'n',
+            BoardPiece {
+                piece_type: ChessPieces::Knights,
+                piece_color: PieceColor::Black,
+            },
+        ),
+        (
+            'b',
+            BoardPiece {
+                piece_type: ChessPieces::Bishops,
+                piece_color: PieceColor::Black,
+            },
+        ),
+        (
+            'q',
+            BoardPiece {
+                piece_type: ChessPieces::Queens,
+                piece_color: PieceColor::Black,
+            },
+        ),
+        (
+            'k',
+            BoardPiece {
+                piece_type: ChessPieces::Kings,
+                piece_color: PieceColor::Black,
+            },
+        ),
+        (
+            'p',
+            BoardPiece {
+                piece_type: ChessPieces::Pawns,
+                piece_color: PieceColor::Black,
+            },
+        ),
+        (
+            'R',
+            BoardPiece {
+                piece_type: ChessPieces::Rooks,
+                piece_color: PieceColor::White,
+            },
+        ),
+        (
+            'N',
+            BoardPiece {
+                piece_type: ChessPieces::Knights,
+                piece_color: PieceColor::White,
+            },
+        ),
+        (
+            'B',
+            BoardPiece {
+                piece_type: ChessPieces::Bishops,
+                piece_color: PieceColor::White,
+            },
+        ),
+        (
+            'Q',
+            BoardPiece {
+                piece_type: ChessPieces::Queens,
+                piece_color: PieceColor::White,
+            },
+        ),
+        (
+            'K',
+            BoardPiece {
+                piece_type: ChessPieces::Kings,
+                piece_color: PieceColor::White,
+            },
+        ),
+        (
+            'P',
+            BoardPiece {
+                piece_type: ChessPieces::Pawns,
+                piece_color: PieceColor::White,
+            },
+        ),
     ]);
 
     let mut file = 0;
