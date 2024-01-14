@@ -1,5 +1,6 @@
 
 # Cirno Chess Engine
+![Cirno(1)](https://github.com/DoormatIka/cirno-chess-engine/assets/68234036/077643ad-27f9-4279-b091-0351e8ec7697)
 A programmer's first attempt at a full from scratch chess engine.
 
 ### Credits
