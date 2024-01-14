@@ -197,26 +197,25 @@ fn cull_king_moves(
 ) -> Vec<Move> {
     let mut movements = Vec::new();
 
-    for piece_index in 0..64 {
-        let piece = board[piece_index as usize];
-        if piece.piece_type == ChessPieces::Kings {
-            // i need to get the intersection of king_movements and enemy_movements.
-            let king_m: Vec<_> = friendly_movements // king_movements
-                .iter()
-                .filter(|friend_move| {
-                    board[friend_move.start_square as usize].piece_type == ChessPieces::Kings
-                })
-                .collect();
-            let enemy_m: Vec<_> = enemy_movements
-                .iter()
-                // filtering out the moves that the king has (BROKEN)
-                .filter(|enemy_move| !king_m.contains(enemy_move))
-                .collect();
-            // dbg!(&enemy_m);
-            movements.extend(enemy_m);
-            break;
-        }
-    }
+    let king_m: Vec<_> = friendly_movements // king_movements
+        .iter()
+        .filter(|friend_move| {
+            board[friend_move.start_square as usize].piece_type == ChessPieces::Kings
+        })
+        .collect();
+    let enemy_m: Vec<_> = enemy_movements
+        .iter()
+        // filtering out the moves that the king has (BROKEN)
+        .filter(|enemy_move| king_m.contains(enemy_move))
+        .collect();
+    let king_m: Vec<_> = friendly_movements // king_movements
+        .iter()
+        .filter(|friend_move| {
+            board[friend_move.start_square as usize].piece_type == ChessPieces::Kings
+        })
+        .collect();
+    // dbg!(&enemy_m);
+    movements.extend(king_m);
 
     movements
 }
