@@ -197,24 +197,20 @@ fn cull_king_moves(
 ) -> Vec<Move> {
     let mut movements = Vec::new();
 
-    let king_m: Vec<_> = friendly_movements // king_movements
-        .iter()
-        .filter(|friend_move| {
-            board[friend_move.start_square as usize].piece_type == ChessPieces::Kings
-        })
-        .collect();
-    let enemy_m: Vec<_> = enemy_movements
-        .iter()
-        // filtering out the moves that the king has (BROKEN)
-        .filter(|enemy_move| king_m.contains(enemy_move))
-        .collect();
-    let king_m: Vec<_> = friendly_movements // king_movements
-        .iter()
-        .filter(|friend_move| {
-            board[friend_move.start_square as usize].piece_type == ChessPieces::Kings
-        })
-        .collect();
-    // dbg!(&enemy_m);
+    // FUCKCNSDLVKNDSLJVNDSKLCM
+    //
+    // How do you remove the king moves that the opponent moves intersect with???
+    let mut king_index = 0;
+
+    for king_movement in friendly_movements {
+        let enemy_m: Vec<_> = enemy_movements
+            .iter()
+            // filtering out the moves that the king has (BROKEN)
+            .filter(|enemy_move| king_movement.target_square == enemy_move.target_square)
+            .collect();
+        friendly_movements.remove(king_index);
+        king_index += 1;
+    }
     movements.extend(king_m);
 
     movements
