@@ -58,6 +58,7 @@ fn main() {
         "8/8/8/8/2k1Q3/8/8/2R5 b",
         "4r3/8/8/8/8/8/8/R3K2R w KQha - 0 1",
         "k7/3Q4/8/2R5/8/8/8/8 b - - 0 1",
+        "8/pppppppp/8/3K4/8/8/PPPPPPPP/8 b HAha - 0 1"
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
@@ -98,12 +99,10 @@ fn main() {
 
         cull_king_moves(&mut friendly_movements, &enemy_movements);
         // king restriction.
-        let friendly_movements = if let Some(_) = has_check {
-            /*
+        let friendly_movements = if let Some(checks) = has_check {
             for check in checks {
                 println!("{:?}", &fen_state.board[check.start_square as usize]);
             }
-            */
             let mut king_movement: Vec<Move> = vec![];
             for piece_index in 0..64 {
                 let piece = &fen_state.board[piece_index as usize];
@@ -207,7 +206,9 @@ fn cull_king_moves(friendly_king_movements: &mut Vec<Move>, enemy_movements: &Ve
     friendly_king_movements.retain(|king_movement| {
         !enemy_movements
             .iter()
-            .any(|enemy_move| king_movement.target_square == enemy_move.target_square)
+            .any(|enemy_move| king_movement.target_square == enemy_move.target_square 
+                 && enemy_move.move_type == MoveType::Normal
+            )
     });
 }
 
