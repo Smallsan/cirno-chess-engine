@@ -33,6 +33,16 @@ pub fn generate_sliding_pieces(
                 }
 
                 if is_opponent_color(&target_piece.piece_color, &start_piece.piece_color) {
+                    // if the King hit is of the opposite color
+                    if target_piece.piece_type == ChessPieces::Kings {
+                        moves.push(Move {
+                            start_square: start_square as i16,
+                            target_square,
+                            move_type: MoveType::Piercing,
+                        });
+                        continue;
+                    }
+
                     let movement = Move {
                         start_square: start_square as i16,
                         target_square,

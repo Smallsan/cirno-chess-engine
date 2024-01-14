@@ -149,7 +149,7 @@ fn find_pinned_pieces_in_board(
 
 /**
  * Detects checks.
- * If there's a target square that hits with the king's start square, 
+ * If there's a target square that hits with the king's start square,
  *      this will return those target squares.
  */
 fn detect_check(
