@@ -38,8 +38,6 @@ use std::time::Instant;
 //      - Promotions
 // King
 //      - Culling king moves that intersect with enemy moves.
-//      - King Checks (In Progress)
-//          - Restricting movement to only the king.
 //      - King Pins
 //          - Restricting allowed movement of the pinned piece.
 //
@@ -51,7 +49,7 @@ fn main() {
         "8/8/8/8/8/4p3/3P1P2/8 b",
         "8/8/8/8/8/3npb2/3P1P2/8 w",
     ];
-    let castling = vec![
+    let _castling = vec![
         "8/8/8/8/8/8/8/R3K3 w Q - 0 1",
         "8/8/8/8/8/8/8/R3Kp1R w KQha - 0 1",
         "8/8/8/8/8/8/8/R3K2R w KQha - 0 1",
@@ -59,6 +57,7 @@ fn main() {
     let check = vec![
         "8/8/8/8/2k1Q3/8/8/2R5 b",
         "4r3/8/8/8/8/8/8/R3K2R w KQha - 0 1",
+        "k7/3Q4/8/2R5/8/8/8/8 b - - 0 1",
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
@@ -97,17 +96,20 @@ fn main() {
         let pinned_pieces =
             find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
 
+        cull_king_moves(&mut friendly_movements, &enemy_movements);
         // king restriction.
-        let friendly_movements = if let Some(checks) = has_check {
+        let friendly_movements = if let Some(_) = has_check {
+            /*
             for check in checks {
                 println!("{:?}", &fen_state.board[check.start_square as usize]);
             }
+            */
             let mut king_movement: Vec<Move> = vec![];
             for piece_index in 0..64 {
                 let piece = &fen_state.board[piece_index as usize];
                 if piece.piece_type == ChessPieces::Kings {
-                    cull_king_moves(&mut friendly_movements, &enemy_movements);
-                    king_movement = restrict_king(&friendly_movements, &fen_state.board, true);
+                    king_movement = restrict_king(&friendly_movements, &fen_state.board);
+                    break;
                 }
             }
             king_movement
@@ -120,11 +122,17 @@ fn main() {
     println!("Elapsed time: {:.2?}", before.elapsed());
 }
 
+/**
+ * Unimplemented: What direction a piece can go in the pin.
+ */
 fn find_pinned_pieces_in_board(
     board: &[BoardPiece; 64],
     movement: &Vec<Move>,
     sqs_to_edge: &SquaresToEdge,
 ) -> Vec<(i16, ChessPieces, PieceColor)> {
+    // We could run the diagonal traversal again, or label "pierced" moves
+    //      and compile all of them here.
+
     let mut pinned_pieces: Vec<(i16, ChessPieces, PieceColor)> = vec![];
     for moves in movement {
         if matches!(
@@ -140,7 +148,9 @@ fn find_pinned_pieces_in_board(
 }
 
 /**
- * Needs the other side's movegen.
+ * Detects checks.
+ * If there's a target square that hits with the king's start square, 
+ *      this will return those target squares.
  */
 fn detect_check(
     friendly_piece_locations: &Vec<(ChessPieces, usize)>,
@@ -164,13 +174,13 @@ fn detect_check(
 }
 
 /**
- * Broken since checks need the other side's movegen to function correctly.
+ * Restricts moves the player can take into only the king.
+ *
+ * Optimization tip:
+ * Needs to mutate the friendly_movements instead of returning a new one.
+ * Allocation is wasteful yknow!
  */
-fn restrict_king(
-    friendly_movements: &Vec<Move>,
-    board: &[BoardPiece; 64],
-    only_king: bool,
-) -> Vec<Move> {
+fn restrict_king(friendly_movements: &Vec<Move>, board: &[BoardPiece; 64]) -> Vec<Move> {
     let mut king_movements = Vec::new();
 
     for piece_index in 0..64 {
@@ -190,6 +200,9 @@ fn restrict_king(
     king_movements
 }
 
+/**
+ * Removes the king moves that overlap with enemy movements.
+ */
 fn cull_king_moves(friendly_king_movements: &mut Vec<Move>, enemy_movements: &Vec<Move>) {
     friendly_king_movements.retain(|king_movement| {
         !enemy_movements
