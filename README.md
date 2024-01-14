@@ -1,7 +1,4 @@
 
-# Abandoned
-- I should've used ECS for this instead of FP. Come look at the second attempt: [Margatroid](https://github.com/DoormatIka/alice-chess-engine)
-
 # Cirno Chess Engine
 A programmer's first attempt at a full from scratch chess engine.
 
