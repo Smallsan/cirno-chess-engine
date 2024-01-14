@@ -1,4 +1,5 @@
-use crate::types::{BoardPiece, Castle, ChessPieces, ChessState, PieceColor};
+use crate::types::{BoardPiece, Castle, ChessPieces, PieceColor};
+use crate::chess_state::ChessState;
 use std::collections::HashMap;
 
 /**
@@ -18,12 +19,7 @@ pub fn load_fen_state(fen: String) -> Result<ChessState, &'static str> {
 
     let mut state = ChessState {
         board,
-        color_to_move: PieceColor::None,
-        is_able_to_castle: Castle {
-            queenside: false,
-            kingside: false,
-        },
-        pinned_pieces: vec![],
+        ..Default::default()
     };
 
     for (i, &part) in fen.iter().skip(1).enumerate() {

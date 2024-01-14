@@ -28,36 +28,19 @@ pub fn generate_sliding_pieces(
 
             if let Some(target_piece) = target_piece {
                 // blocked by a friendly piece, don't go further
-                if is_color(&target_piece.piece_color, &start_piece.piece_color) {
-                    break;
-                }
-
-                if is_opponent_color(&target_piece.piece_color, &start_piece.piece_color) {
-                    // if the King hit is of the opposite color
-                    if target_piece.piece_type == ChessPieces::Kings {
-                        moves.push(Move {
-                            start_square: start_square as i16,
-                            target_square,
-                            move_type: MoveType::Piercing,
-                        });
-                        continue;
-                    }
-
-                    let movement = Move {
-                        start_square: start_square as i16,
-                        target_square,
-                        move_type: MoveType::Normal,
-                    };
-                    moves.push(movement);
-                    break;
-                }
-
-                let movements = Move {
+                let movement = Move {
                     start_square: start_square as i16,
                     target_square,
                     move_type: MoveType::Normal,
                 };
-                moves.push(movements);
+                if is_color(&target_piece.piece_color, &start_piece.piece_color) {
+                    break;
+                }
+                if is_opponent_color(&target_piece.piece_color, &start_piece.piece_color) {
+                    moves.push(movement);
+                    break;
+                }
+                moves.push(movement);
             }
         }
     }

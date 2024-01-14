@@ -48,12 +48,6 @@ pub struct Move {
     pub move_type: MoveType,
 }
 
-pub struct ChessState {
-    pub board: [BoardPiece; 64],
-    pub color_to_move: PieceColor,
-    pub is_able_to_castle: Castle,
-    pub pinned_pieces: Vec<BoardPiece>,
-}
 
 #[derive(Debug, Default)]
 pub struct Castle {
@@ -61,15 +55,3 @@ pub struct Castle {
     pub kingside: bool,
 }
 
-impl Default for ChessState {
-    fn default() -> ChessState {
-        ChessState {
-            board: [BoardPiece {
-                ..Default::default()
-            }; 64],
-            color_to_move: PieceColor::Black,
-            is_able_to_castle: Default::default(),
-            pinned_pieces: vec![],
-        }
-    }
-}

@@ -1,4 +1,3 @@
-use crate::color::is_opponent_color;
 use crate::types::{BoardPiece, ChessPieces, Move, MoveType, PieceColor};
 
 /*

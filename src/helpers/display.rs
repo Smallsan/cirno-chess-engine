@@ -1,4 +1,5 @@
-use crate::types::{BoardPiece, ChessPieces, ChessState, Move, MoveType, PieceColor};
+use crate::types::{BoardPiece, ChessPieces, Move, MoveType, PieceColor};
+use crate::chess_state::ChessState;
 
 pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
     let turn_color = match state.color_to_move {
