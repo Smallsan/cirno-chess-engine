@@ -1,8 +1,9 @@
 
+# Abandoned
+- I should've used ECS for this instead of FP. Come look at the second attempt: [Margatroid](https://github.com/DoormatIka/alice-chess-engine)
+
 # Cirno Chess Engine
 A programmer's first attempt at a full from scratch chess engine.
-
-A "Two Leaf Lotus" project.
 
 ### Credits
 - Sebastian Lague for getting me into the world of chess programming.

@@ -57,11 +57,11 @@ fn main() {
         "8/8/8/8/8/8/8/R3K2R w KQha - 0 1",
     ];
     let check = vec![
-        "8/8/8/8/2k1Q3/8/8/2R5 b",
-        "4r3/8/8/8/8/8/8/R3K2R w KQha - 0 1",
-        "k7/3Q4/8/2R5/8/8/8/8 b - - 0 1",
-        "8/pppppppp/8/3K1P2/8/8/2r5/8 b HAha - 0 1",
-        "8/pppppppp/8/3K1P2/8/8/2r5/8 w HAha - 0 1"
+        "4k3/pppppppp/8/3K1P2/8/8/2r5/8 w - - 0 1",
+        "4k3/pppppppp/8/3K1P2/8/8/2r5/8 b - - 0 1",
+        "8/pppppppp/8/3K1P2/8/8/2r5/8 w HAha - 0 1",
+        "8/pppppppp/8/3k1P2/8/8/2rK4/8 w - - 0 1",
+        "8/pppppppp/8/3k1P2/8/8/2r3N1/3K4 w - - 0 1"
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
@@ -102,6 +102,9 @@ fn main() {
 
         // king restriction.
         cull_king_moves(&mut friendly_movements, &enemy_movements);
+
+        dbg!(has_check);
+        /*
         let friendly_movements = if let Some(checks) = has_check {
             for check in checks {
                 println!("{:?}", &fen_state.board[check.start_square as usize]);
@@ -118,6 +121,7 @@ fn main() {
         } else {
             friendly_movements
         };
+        */
 
         display::display_chess_tui(&fen_state, &friendly_movements);
     }
@@ -167,7 +171,7 @@ fn detect_check(
         let mut enemy_intersection = Vec::<Move>::new();
         let has_enemy_intersection_with_king = enemy_movements
             .into_iter()
-            .filter(|mov| mov.target_square as usize == king_position.1);
+            .filter(|mov| mov.target_square as usize == king_position.1 && mov.move_type == MoveType::Normal);
         enemy_intersection.extend(has_enemy_intersection_with_king);
         Some(enemy_intersection)
     } else {
@@ -210,7 +214,7 @@ fn cull_king_moves(friendly_king_movements: &mut Vec<Move>, enemy_movements: &Ve
         !enemy_movements
             .iter()
             .any(|enemy_move| king_movement.target_square == enemy_move.target_square 
-                 && enemy_move.move_type == MoveType::Normal
+                && enemy_move.move_type == MoveType::Normal
             )
     });
 }
