@@ -37,6 +37,7 @@ use std::time::Instant;
 //      - En Passant
 //      - Promotions
 // King
+//      - Culling king moves that intersect with enemy moves.
 //      - King Checks (In Progress)
 //          - Restricting movement to only the king.
 //      - King Pins
@@ -50,12 +51,14 @@ fn main() {
         "8/8/8/8/8/4p3/3P1P2/8 b",
         "8/8/8/8/8/3npb2/3P1P2/8 w",
     ];
-    let _castling = vec![
-        "rnbqk2r/ppp5/8/8/8/8/P7/R2QKBNR b KQkq - 0 1",
-        "rnbqk2r/ppp5/8/8/8/8/P7/R3K2R w KQkq - 0 1",
+    let castling = vec![
+        "8/8/8/8/8/8/8/R3K3 w Q - 0 1",
+        "8/8/8/8/8/8/8/R3Kp1R w KQha - 0 1",
+        "8/8/8/8/8/8/8/R3K2R w KQha - 0 1",
     ];
     let check = vec![
         "8/8/8/8/2k1Q3/8/8/2R5 b",
+        "4r3/8/8/8/8/8/8/R3K2R w KQha - 0 1",
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
@@ -99,14 +102,15 @@ fn main() {
             for check in checks {
                 println!("{:?}", &fen_state.board[check.start_square as usize]);
             }
-
+            let mut king_movement: Vec<Move> = vec![];
             for piece_index in 0..64 {
                 let piece = &fen_state.board[piece_index as usize];
                 if piece.piece_type == ChessPieces::Kings {
-                    restrict_only_to_king(&friendly_movements, &fen_state.board);
+                    king_movement = restrict_king(&friendly_movements, &fen_state.board, true);
+                    cull_king_moves(&fen_state.board, &friendly_movements, &enemy_movements);
                 }
             }
-            friendly_movements
+            king_movement
         } else {
             friendly_movements
         };
@@ -140,7 +144,7 @@ fn find_pinned_pieces_in_board(
  */
 fn detect_check(
     friendly_piece_locations: &Vec<(ChessPieces, usize)>,
-    enemy_movements: &Vec<Move>, // this is supposed to be Vec<Move>
+    enemy_movements: &Vec<Move>,
 ) -> Option<Vec<Move>> {
     // finding the king
     let king_position = friendly_piece_locations
@@ -162,20 +166,59 @@ fn detect_check(
 /**
  * Broken since checks need the other side's movegen to function correctly.
  */
-fn restrict_only_to_king(friendly_movements: &Vec<Move>, board: &[BoardPiece; 64]) -> Vec<Move> {
+fn restrict_king(
+    friendly_movements: &Vec<Move>,
+    board: &[BoardPiece; 64],
+    only_king: bool,
+) -> Vec<Move> {
     let mut king_movements = Vec::new();
 
     for piece_index in 0..64 {
         let piece = board[piece_index as usize];
         if piece.piece_type == ChessPieces::Kings {
             let move_iter = friendly_movements.iter();
-            let filtered = move_iter.filter(|moves| moves.start_square == piece_index);
-            let result: Vec<_> = filtered.collect();
-            king_movements.extend(result);
+            let filtered: Vec<_> = move_iter
+                .filter(|moves| {
+                    moves.start_square == piece_index && moves.move_type != MoveType::Castle
+                })
+                .collect();
+            king_movements.extend(filtered);
+            break;
         }
     }
 
     king_movements
+}
+
+fn cull_king_moves(
+    board: &[BoardPiece; 64],
+    friendly_movements: &Vec<Move>,
+    enemy_movements: &Vec<Move>,
+) -> Vec<Move> {
+    let mut movements = Vec::new();
+
+    for piece_index in 0..64 {
+        let piece = board[piece_index as usize];
+        if piece.piece_type == ChessPieces::Kings {
+            // i need to get the intersection of king_movements and enemy_movements.
+            let king_m: Vec<_> = friendly_movements // king_movements
+                .iter()
+                .filter(|friend_move| {
+                    board[friend_move.start_square as usize].piece_type == ChessPieces::Kings
+                })
+                .collect();
+            let enemy_m: Vec<_> = enemy_movements
+                .iter()
+                // filtering out the moves that the king has (BROKEN)
+                .filter(|enemy_move| !king_m.contains(enemy_move))
+                .collect();
+            // dbg!(&enemy_m);
+            movements.extend(enemy_m);
+            break;
+        }
+    }
+
+    movements
 }
 
 /**

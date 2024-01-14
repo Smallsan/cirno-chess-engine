@@ -42,7 +42,7 @@ pub enum MoveType {
     Normal, // piece can capture.
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Move {
     pub start_square: i16,
     pub target_square: i16,
