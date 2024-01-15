@@ -52,10 +52,10 @@ fn main() {
         "8/8/8/8/8/8/8/R3Kp1R w KQha - 0 1",
         "8/8/8/8/8/8/8/R3K2R w KQha - 0 1",
     ];
-    let check = vec![
-        "rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR w KQkq - 0 1",
+    let check = vec!["rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR w KQkq - 0 1"];
+    let check_movements = vec![
+        "8/8/8/8/8/8/4Q3/8 w HAha - 0 1",
     ];
-    let check_movements = vec!["8/8/8/8/8/8/4Q3/8 w HAha - 0 1"];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
@@ -99,8 +99,6 @@ fn main() {
             Err(err) => println!("{}", err),
         }
         display::display_chess_tui(&fen_state, &friendly_movements);
-        
-
     }
     println!("Elapsed time: {:.2?}", before.elapsed());
 }

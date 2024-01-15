@@ -16,9 +16,10 @@ pub fn make_move(
 ) -> Result<(Move, BoardPiece), &'static str> {
     let (start_square_index, end_square_index) = algebraic_notation_decoder(notation)?;
     dbg!(start_square_index, end_square_index);
-    let moves = friendly_movements
-        .iter()
-        .find(|moves| (moves.start_square as u32, moves.target_square as u32) == (start_square_index, end_square_index));
+    let moves = friendly_movements.iter().find(|moves| {
+        (moves.start_square as u32, moves.target_square as u32)
+            == (start_square_index, end_square_index)
+    });
     match moves {
         Some(moves) => {
             let piece = (moves.clone(), board[start_square_index as usize].clone());
