@@ -52,20 +52,20 @@ fn algebraic_notation_decoder(notation: &str) -> Result<(u32, u32), &'static str
     let end_square_index = convert_algebraic_snippet(notation_end);
     Ok((start_square_index, end_square_index))
 }
+
 fn convert_algebraic_snippet(notation: &str) -> u32 {
-    let mut start_square_index = 1;
+    let mut file = 0;
+    let mut rank = 0;
     for ch in notation.chars() {
         match ch {
-            '1'..='8' => start_square_index *= ch.to_digit(10).unwrap(), // yeah idk if this is
-            // even right
-            //
-            // 1 indexed!! make sure the indexing is right.
-            'A'..='H' | 'a'..='h' => start_square_index += map_char_to_number(ch).unwrap(),
+            '1'..='8' => rank = ch.to_digit(10).unwrap() - 1, // 0 indexed
+            'A'..='H' | 'a'..='h' => file = map_char_to_number(ch).unwrap() -1, // 0 indexed
             _ => {}
         }
     }
-    start_square_index
+    rank * 8 + file
 }
+
 fn map_char_to_number(c: char) -> Option<u32> {
     match c {
         'A' | 'a' => Some(1),
