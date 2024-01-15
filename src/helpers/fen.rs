@@ -1,5 +1,5 @@
-use crate::types::{BoardPiece, Castle, ChessPieces, PieceColor};
 use crate::chess_state::ChessState;
+use crate::types::{BoardPiece, Castle, ChessPieces, PieceColor};
 use std::collections::HashMap;
 
 /**

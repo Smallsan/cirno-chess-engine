@@ -22,9 +22,9 @@
 // We could have a function that actually
 //      moves the pieces in the chess board using Algebraic Notation.
 
+mod chess_state;
 mod helpers;
 mod moves;
-mod chess_state;
 mod types;
 
 use crate::helpers::*;
