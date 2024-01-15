@@ -27,6 +27,7 @@ mod helpers;
 mod moves;
 mod types;
 
+use crate::chess_state::make_move;
 use crate::helpers::*;
 use crate::moves::sliding_piece::find_pinned_pieces_in_square;
 use crate::moves::*;
@@ -53,14 +54,14 @@ fn main() {
     ];
     let check = vec![
         "rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR w KQkq - 0 1",
-        "rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR b KQkq - 0 1",
     ];
+    let check_movements = vec!["8/8/8/8/8/8/4Q3/8 w HAha - 0 1"];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
     let before = Instant::now();
-    for fen in check {
-        let fen_state = match fen::load_fen_state(fen.to_string()) {
+    for fen in check_movements {
+        let mut fen_state = match fen::load_fen_state(fen.to_string()) {
             Ok(state) => state,
             Err(err) => {
                 println!("Error! {}", err);
@@ -90,7 +91,16 @@ fn main() {
         let pinned_pieces =
             find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
 
+        let notation = "e2e4";
+        dbg!(notation);
         display::display_chess_tui(&fen_state, &friendly_movements);
+        match make_move(&mut fen_state.board, &friendly_movements, notation) {
+            Ok(mov) => println!("Works."),
+            Err(err) => println!("{}", err),
+        }
+        display::display_chess_tui(&fen_state, &friendly_movements);
+        
+
     }
     println!("Elapsed time: {:.2?}", before.elapsed());
 }

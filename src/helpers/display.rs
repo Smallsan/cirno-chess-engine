@@ -12,12 +12,26 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
     let mut position = 0;
     print!("\n{turn_color}'s turn\n");
 
+    for i in 0..8 {
+        let letter = match i {
+            0 => "a",
+            1 => "b",
+            2 => "c",
+            3 => "d",
+            4 => "e",
+            5 => "f",
+            6 => "g",
+            7 => "h",
+            _ => unreachable!(),
+        };
+        print!(" {}  ", letter)
+    }
+    println!("");
     for square in state.board {
         let newline = if print_index % 8 == 0 {
-            print_index = 0;
-            "\n"
+            format!(" {}\n", print_index / 8)
         } else {
-            ""
+            String::from("")
         };
 
         let mut castling_moves = find_castling_moves(movement);

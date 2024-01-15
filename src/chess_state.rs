@@ -9,12 +9,13 @@ pub struct ChessState {
     pub pinned_pieces: Vec<BoardPiece>,
 }
 
-fn make_move(
+pub fn make_move(
     board: &mut [BoardPiece; 64],
     friendly_movements: &Vec<Move>,
     notation: &str,
 ) -> Result<(Move, BoardPiece), &'static str> {
-    let (start_square_index, end_square_index) = algebraic_notation_decoder(notation);
+    let (start_square_index, end_square_index) = algebraic_notation_decoder(notation)?;
+    dbg!(start_square_index, end_square_index);
     let moves = friendly_movements
         .iter()
         .find(|moves| (moves.start_square as u32, moves.target_square as u32) == (start_square_index, end_square_index));
@@ -33,7 +34,7 @@ fn make_move(
 // i gotta get info from the notation on the piece type, color, and position
 //
 // i could also return the previously made move from the make_move function.
-fn unmake_move(board: &mut [BoardPiece; 64], piece_and_move: (Move, BoardPiece)) {
+pub fn unmake_move(board: &mut [BoardPiece; 64], piece_and_move: (Move, BoardPiece)) {
     let (move_, board_piece) = piece_and_move;
     board[move_.start_square as usize] = board_piece;
     board[move_.target_square as usize] = BoardPiece {
@@ -41,21 +42,24 @@ fn unmake_move(board: &mut [BoardPiece; 64], piece_and_move: (Move, BoardPiece))
     };
 }
 
-fn algebraic_notation_decoder(notation: &str) -> (u32, u32) {
+fn algebraic_notation_decoder(notation: &str) -> Result<(u32, u32), &'static str> {
+    if notation.is_empty() {
+        return Err("Empty notation!");
+    }
     let (notation_start, notation_end) = notation.split_at(2);
     let start_square_index = convert_algebraic_snippet(notation_start);
     let end_square_index = convert_algebraic_snippet(notation_end);
-    (start_square_index, end_square_index)
+    Ok((start_square_index, end_square_index))
 }
 fn convert_algebraic_snippet(notation: &str) -> u32 {
-    let mut start_square_index = 0;
+    let mut start_square_index = 1;
     for ch in notation.chars() {
         match ch {
-            '1'..='8' => start_square_index += ch.to_digit(10).unwrap(), // yeah idk if this is
+            '1'..='8' => start_square_index *= ch.to_digit(10).unwrap(), // yeah idk if this is
             // even right
             //
             // 1 indexed!! make sure the indexing is right.
-            'A'..='H' => start_square_index *= map_char_to_number(ch).unwrap(),
+            'A'..='H' | 'a'..='h' => start_square_index += map_char_to_number(ch).unwrap(),
             _ => {}
         }
     }
@@ -63,14 +67,14 @@ fn convert_algebraic_snippet(notation: &str) -> u32 {
 }
 fn map_char_to_number(c: char) -> Option<u32> {
     match c {
-        'A' => Some(1),
-        'B' => Some(2),
-        'C' => Some(3),
-        'D' => Some(4),
-        'E' => Some(5),
-        'F' => Some(6),
-        'G' => Some(7),
-        'H' => Some(8),
+        'A' | 'a' => Some(1),
+        'B' | 'b' => Some(2),
+        'C' | 'c' => Some(3),
+        'D' | 'd' => Some(4),
+        'E' | 'e' => Some(5),
+        'F' | 'f' => Some(6),
+        'G' | 'g' => Some(7),
+        'H' | 'h' => Some(8),
         _ => None, // Handle other characters if needed
     }
 }
