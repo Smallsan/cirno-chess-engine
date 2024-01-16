@@ -9,13 +9,15 @@ pub struct ChessState {
     pub pinned_pieces: Vec<BoardPiece>,
 }
 
+/**
+ * Castling no work yet!
+ */
 pub fn make_move(
     board: &mut [BoardPiece; 64],
     friendly_movements: &Vec<Move>,
     notation: &str,
 ) -> Result<(Move, BoardPiece), &'static str> {
     let (start_square_index, end_square_index) = algebraic_notation_decoder(notation)?;
-    dbg!(start_square_index, end_square_index);
     let moves = friendly_movements.iter().find(|moves| {
         (moves.start_square as u32, moves.target_square as u32)
             == (start_square_index, end_square_index)
@@ -32,15 +34,19 @@ pub fn make_move(
         None => Err("Move not allowed."),
     }
 }
-// i gotta get info from the notation on the piece type, color, and position
-//
-// i could also return the previously made move from the make_move function.
-pub fn unmake_move(board: &mut [BoardPiece; 64], piece_and_move: (Move, BoardPiece)) {
+
+pub fn unmake_move(board: &mut [BoardPiece; 64], piece_and_move: (Move, BoardPiece)) -> Result<(), &'static str> {
     let (move_, board_piece) = piece_and_move;
-    board[move_.start_square as usize] = board_piece;
-    board[move_.target_square as usize] = BoardPiece {
-        ..Default::default() // Empty.
-    };
+
+    if move_.start_square >= 64 || move_.target_square >= 64 {
+        Err("Out of bounds!")
+    } else {
+        board[move_.start_square as usize] = board_piece;
+        board[move_.target_square as usize] = BoardPiece {
+            ..Default::default() // Empty.
+        };
+        Ok(())
+    }
 }
 
 fn algebraic_notation_decoder(notation: &str) -> Result<(u32, u32), &'static str> {

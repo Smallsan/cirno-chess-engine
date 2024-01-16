@@ -28,11 +28,14 @@ mod moves;
 mod types;
 
 use crate::chess_state::make_move;
+use crate::chess_state::unmake_move;
 use crate::helpers::*;
 use crate::moves::sliding_piece::find_pinned_pieces_in_square;
 use crate::moves::*;
 use crate::types::*;
+
 use std::time::Instant;
+use std::io::stdin;
 
 // TODO
 // Pawn Pieces
@@ -47,20 +50,20 @@ fn main() {
         "8/8/8/8/8/4p3/3P1P2/8 b",
         "8/8/8/8/8/3npb2/3P1P2/8 w",
     ];
-    let _castling = vec![
+    let castling = vec![
         "8/8/8/8/8/8/8/R3K3 w Q - 0 1",
         "8/8/8/8/8/8/8/R3Kp1R w KQha - 0 1",
         "8/8/8/8/8/8/8/R3K2R w KQha - 0 1",
     ];
-    let check = vec!["rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR w KQkq - 0 1"];
-    let check_movements = vec![
+    let _check = vec!["rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR w KQkq - 0 1"];
+    let _check_movements = vec![
         "8/8/8/8/8/8/4Q3/8 w HAha - 0 1",
     ];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
     let before = Instant::now();
-    for fen in check_movements {
+    for fen in castling {
         let mut fen_state = match fen::load_fen_state(fen.to_string()) {
             Ok(state) => state,
             Err(err) => {
@@ -86,21 +89,104 @@ fn main() {
             &fen_state.is_able_to_castle,
             &squares_to_edge,
         );
-        // detect check and pinned here.
+        ////////////////////////////////////
         let has_check = detect_check(&friendly_piece_locations, &enemy_movements);
         let pinned_pieces =
             find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
+        ////////////////////////////////////
+        display::display_chess_tui(&fen_state, &friendly_movements);
 
-        let notation = "e2e4";
-        dbg!(notation);
-        display::display_chess_tui(&fen_state, &friendly_movements);
-        match make_move(&mut fen_state.board, &friendly_movements, notation) {
-            Ok(mov) => println!("Works."),
-            Err(err) => println!("{}", err),
+
+        let mut previous_move: Option<(Move, BoardPiece)> = None;
+        loop {
+            let friendly = if let Some(check) = has_check {
+                if check {
+                    if let Some(previous_move) = previous_move {
+                        match unmake_move(&mut fen_state.board, previous_move) {
+                            Ok(()) => {
+                                println!("In check, unmade move.");
+                                Some(generate_moves(
+                                    &fen_state.board,
+                                    &fen_state.color_to_move,
+                                    &fen_state.is_able_to_castle,
+                                    &squares_to_edge,
+                                ))
+                            },
+                            Err(err) => {
+                                println!("Error. {}", err);
+                                None
+                            }
+                        }
+                    } else {
+                        Some(generate_moves(
+                            &fen_state.board,
+                            &fen_state.color_to_move,
+                            &fen_state.is_able_to_castle,
+                            &squares_to_edge,
+                        ))
+                    }
+                } else {
+                    Some(generate_moves(
+                        &fen_state.board,
+                        &fen_state.color_to_move,
+                        &fen_state.is_able_to_castle,
+                        &squares_to_edge,
+                    ))
+                }
+            } else {
+                Some(generate_moves(
+                    &fen_state.board,
+                    &fen_state.color_to_move,
+                    &fen_state.is_able_to_castle,
+                    &squares_to_edge,
+                ))
+            };
+            if let Some(friendly) = friendly {
+                let (_, friendly_movements) = friendly;
+                display::display_chess_tui(&fen_state, &friendly_movements);
+
+                let notation = get_user_input().expect("Failed to scan notation.");
+                
+                previous_move = match make_move(&mut fen_state.board, &friendly_movements, notation.as_str()) {
+                    Ok(mov) => {
+                        println!("Moved to {}", notation);
+                        Some(mov)
+                    },
+                    Err(err) => {
+                        println!("{}", err);
+                        None
+                    },
+                };
+            }
         }
-        display::display_chess_tui(&fen_state, &friendly_movements);
+
+        /*
+        if let Some(last_move) = last_move {
+            match unmake_move(&mut fen_state.board, last_move) {
+                Ok(()) => {
+                    println!("Unmade move {}", notation);
+                    let (_, friendly_movements) = generate_moves(
+                        &fen_state.board,
+                        &fen_state.color_to_move,
+                        &fen_state.is_able_to_castle,
+                        &squares_to_edge,
+                    );
+                    display::display_chess_tui(&fen_state, &friendly_movements);
+                },
+                Err(err) => println!("{}", err),
+            }
+        }
+        */
     }
     println!("Elapsed time: {:.2?}", before.elapsed());
+}
+
+fn get_user_input() -> Result<String, &'static str> {
+    let mut input = String::new();
+    println!("Enter your move (e.g. e2e4, f4e2):");
+    stdin().read_line(&mut input).expect("Failed to read line");
+    
+    Ok(input)
 }
 
 /**
