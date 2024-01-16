@@ -70,6 +70,7 @@ fn convert_algebraic_snippet(notation: &str) -> Result<u32, &'static str> {
         match ch {
             '1'..='8' => rank = ch.to_digit(10).unwrap() - 1, // 0 indexed
             'A'..='H' | 'a'..='h' => file = map_char_to_number(ch).unwrap() - 1, // 0 indexed
+            '\r' | '\n' => {},
             _ => return Err("Invalid notation!")
         }
     }
