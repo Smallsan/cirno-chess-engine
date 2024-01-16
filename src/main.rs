@@ -55,11 +55,10 @@ use std::time::Instant;
 // Castling might have the same issue as the check logic.
 //
 fn main() {
-    let fen = "r7/2k5/7R/8/4P3/8/8/r3K3 b HAha - 0 1";
+    let fen = "r7/2k5/7R/8/4P3/8/8/r3K3 w HAha - 0 1";
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
-    let before = Instant::now();
     let mut fen_state = match fen::load_fen_state(fen.to_string()) {
         Ok(state) => state,
         Err(err) => {
@@ -68,21 +67,25 @@ fn main() {
         }
     };
 
+    ////////////////////////////////////
+    /*
     let (_, friendly_movements) = generate_moves(
         &fen_state.board,
         &fen_state.color_to_move,
         &fen_state.is_able_to_castle,
         &squares_to_edge,
     );
-    ////////////////////////////////////
     let pinned_pieces =
         find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
+    */
     ////////////////////////////////////
 
     /////////////////// GAME LOOP ////////////////////
     let mut previous_move: Option<(Move, BoardPiece)> = None;
     loop {
-        let friendly = move_based_on_check(&mut fen_state, &squares_to_edge, previous_move);
+        let before = Instant::now();
+
+        let friendly = generate_moves_based_on_check(&mut fen_state, &squares_to_edge, previous_move);
         if let Some(friendly) = friendly {
             let (_, friendly_movements) = friendly;
             display::display_chess_tui(&fen_state, &friendly_movements);
@@ -92,8 +95,8 @@ fn main() {
             previous_move =
                 match make_move(&mut fen_state.board, &friendly_movements, notation.as_str()) {
                     Ok(mov) => {
+                        fen_state.color_to_move = switch_color(fen_state.color_to_move);
                         println!("Moved to {}", notation);
-                        // fen_state.color_to_move = switch_color(fen_state.color_to_move);
                         Some(mov)
                     }
                     Err(err) => {
@@ -102,21 +105,17 @@ fn main() {
                     }
                 };
         }
+
         println!("Elapsed time: {:.2?}", before.elapsed());
     }
 }
 
-fn move_based_on_check(
+fn generate_moves_based_on_check(
     fen_state: &mut ChessState,
     sqs_to_edge: &SquaresToEdge,
     previous_move: Option<(Move, BoardPiece)>,
 ) -> Option<(Vec<(ChessPieces, usize)>, Vec<Move>)> {
-    let (friendly_piece_locations, _) = generate_moves(
-        &fen_state.board,
-        &fen_state.color_to_move,
-        &fen_state.is_able_to_castle,
-        &sqs_to_edge,
-    );
+    let (friendly_piece_locations, _) = generate_moves(&fen_state.board, &fen_state.color_to_move, &fen_state.is_able_to_castle, &sqs_to_edge);
     let (_, enemy_movements) = generate_moves(
         &fen_state.board,
         match &fen_state.color_to_move {
@@ -134,13 +133,10 @@ fn move_based_on_check(
             if let Some(previous_move) = previous_move {
                 match unmake_move(&mut fen_state.board, previous_move) {
                     Ok(()) => {
+                        fen_state.color_to_move = switch_color(fen_state.color_to_move);
                         println!("In check, unmade move.");
-                        let mov = Some(generate_moves(
-                            &fen_state.board,
-                            &fen_state.color_to_move,
-                            &fen_state.is_able_to_castle,
-                            &sqs_to_edge,
-                        ));
+                        let mov = Some(generate_moves(&fen_state.board, &fen_state.color_to_move, &fen_state.is_able_to_castle, &sqs_to_edge));
+                        fen_state.color_to_move = switch_color(fen_state.color_to_move);
                         return mov;
                     }
                     Err(err) => {
@@ -152,13 +148,7 @@ fn move_based_on_check(
         }
     }
 
-    fen_state.color_to_move = switch_color(fen_state.color_to_move);
-    Some(generate_moves(
-        &fen_state.board,
-        &fen_state.color_to_move,
-        &fen_state.is_able_to_castle,
-        &sqs_to_edge,
-    ))
+    Some(generate_moves(&fen_state.board, &fen_state.color_to_move, &fen_state.is_able_to_castle, &sqs_to_edge))
 }
 
 fn get_user_input() -> Result<String, &'static str> {
