@@ -58,22 +58,22 @@ fn algebraic_notation_decoder(notation: &str) -> Result<(u32, u32), &'static str
         return Err("Empty notation!");
     }
     let (notation_start, notation_end) = notation.split_at(2);
-    let start_square_index = convert_algebraic_snippet(notation_start);
-    let end_square_index = convert_algebraic_snippet(notation_end);
+    let start_square_index = convert_algebraic_snippet(notation_start)?;
+    let end_square_index = convert_algebraic_snippet(notation_end)?;
     Ok((start_square_index, end_square_index))
 }
 
-fn convert_algebraic_snippet(notation: &str) -> u32 {
+fn convert_algebraic_snippet(notation: &str) -> Result<u32, &'static str> {
     let mut file = 0;
     let mut rank = 0;
     for ch in notation.chars() {
         match ch {
             '1'..='8' => rank = ch.to_digit(10).unwrap() - 1, // 0 indexed
             'A'..='H' | 'a'..='h' => file = map_char_to_number(ch).unwrap() - 1, // 0 indexed
-            _ => {}
+            _ => return Err("Invalid notation!")
         }
     }
-    rank * 8 + file
+    Ok(rank * 8 + file)
 }
 
 fn map_char_to_number(c: char) -> Option<u32> {
