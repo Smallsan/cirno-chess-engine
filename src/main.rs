@@ -34,8 +34,8 @@ use crate::moves::sliding_piece::find_pinned_pieces_in_square;
 use crate::moves::*;
 use crate::types::*;
 
-use std::time::Instant;
 use std::io::stdin;
+use std::time::Instant;
 
 // TODO
 // Pawn Pieces
@@ -56,9 +56,7 @@ fn main() {
         "8/8/8/8/8/8/8/R3K2R w KQha - 0 1",
     ];
     let _check = vec!["rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR w KQkq - 0 1"];
-    let _check_movements = vec![
-        "8/8/8/8/8/8/4Q3/8 w HAha - 0 1",
-    ];
+    let _check_movements = vec!["8/8/8/8/8/8/4Q3/8 w HAha - 0 1"];
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
@@ -96,7 +94,6 @@ fn main() {
         ////////////////////////////////////
         display::display_chess_tui(&fen_state, &friendly_movements);
 
-
         let mut previous_move: Option<(Move, BoardPiece)> = None;
         loop {
             let friendly = if let Some(check) = has_check {
@@ -111,7 +108,7 @@ fn main() {
                                     &fen_state.is_able_to_castle,
                                     &squares_to_edge,
                                 ))
-                            },
+                            }
                             Err(err) => {
                                 println!("Error. {}", err);
                                 None
@@ -146,17 +143,18 @@ fn main() {
                 display::display_chess_tui(&fen_state, &friendly_movements);
 
                 let notation = get_user_input().expect("Failed to scan notation.");
-                
-                previous_move = match make_move(&mut fen_state.board, &friendly_movements, notation.as_str()) {
-                    Ok(mov) => {
-                        println!("Moved to {}", notation);
-                        Some(mov)
-                    },
-                    Err(err) => {
-                        println!("{}", err);
-                        None
-                    },
-                };
+
+                previous_move =
+                    match make_move(&mut fen_state.board, &friendly_movements, notation.as_str()) {
+                        Ok(mov) => {
+                            println!("Moved to {}", notation);
+                            Some(mov)
+                        }
+                        Err(err) => {
+                            println!("{}", err);
+                            None
+                        }
+                    };
             }
         }
 
@@ -185,7 +183,7 @@ fn get_user_input() -> Result<String, &'static str> {
     let mut input = String::new();
     println!("Enter your move (e.g. e2e4, f4e2):");
     stdin().read_line(&mut input).expect("Failed to read line");
-    
+
     Ok(input)
 }
 

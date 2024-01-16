@@ -11,6 +11,7 @@ pub struct ChessState {
 
 /**
  * Castling no work yet!
+ * Castling checks no work yet!
  */
 pub fn make_move(
     board: &mut [BoardPiece; 64],
@@ -35,7 +36,10 @@ pub fn make_move(
     }
 }
 
-pub fn unmake_move(board: &mut [BoardPiece; 64], piece_and_move: (Move, BoardPiece)) -> Result<(), &'static str> {
+pub fn unmake_move(
+    board: &mut [BoardPiece; 64],
+    piece_and_move: (Move, BoardPiece),
+) -> Result<(), &'static str> {
     let (move_, board_piece) = piece_and_move;
 
     if move_.start_square >= 64 || move_.target_square >= 64 {
@@ -65,7 +69,7 @@ fn convert_algebraic_snippet(notation: &str) -> u32 {
     for ch in notation.chars() {
         match ch {
             '1'..='8' => rank = ch.to_digit(10).unwrap() - 1, // 0 indexed
-            'A'..='H' | 'a'..='h' => file = map_char_to_number(ch).unwrap() -1, // 0 indexed
+            'A'..='H' | 'a'..='h' => file = map_char_to_number(ch).unwrap() - 1, // 0 indexed
             _ => {}
         }
     }
