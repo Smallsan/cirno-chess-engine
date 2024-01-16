@@ -27,9 +27,12 @@ mod helpers;
 mod moves;
 mod types;
 
+use chess_state::ChessState;
+
 use crate::chess_state::make_move;
 use crate::chess_state::unmake_move;
 use crate::helpers::*;
+use crate::helpers::color::switch_color;
 use crate::moves::sliding_piece::find_pinned_pieces_in_square;
 use crate::moves::*;
 use crate::types::*;
@@ -37,146 +40,125 @@ use crate::types::*;
 use std::io::stdin;
 use std::time::Instant;
 
-// TODO
+// TODO:
 // Pawn Pieces
 //      - En Passant
 //      - Promotions
+// 
+// BUGS:
+// Castling movement broken
 //
-// Loop over pieces instead of the entire board.
-// Algebraic Notation for User Input
+// Check logic doesn't work for both sides.
+//      ChessState has one boolean variable determining if
+//      someone is in check or not.
+//      It should have different booleans for both sides.
+// Castling might have the same issue as the check logic.
+//
 fn main() {
-    let _pawn = vec![
-        "8/8/8/8/2r1P1K1/8/8/8 w",
-        "8/8/8/8/8/4p3/3P1P2/8 b",
-        "8/8/8/8/8/3npb2/3P1P2/8 w",
-    ];
-    let castling = vec![
-        "8/8/8/8/8/8/8/R3K3 w Q - 0 1",
-        "8/8/8/8/8/8/8/R3Kp1R w KQha - 0 1",
-        "8/8/8/8/8/8/8/R3K2R w KQha - 0 1",
-    ];
-    let _check = vec!["rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR w KQkq - 0 1"];
-    let _check_movements = vec!["8/8/8/8/8/8/4Q3/8 w HAha - 0 1"];
+    let fen = "r7/2k5/7R/8/4P3/8/8/r3K3 b HAha - 0 1";
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
     let before = Instant::now();
-    for fen in castling {
-        let mut fen_state = match fen::load_fen_state(fen.to_string()) {
-            Ok(state) => state,
-            Err(err) => {
-                println!("Error! {}", err);
-                break;
-            }
-        };
+    let mut fen_state = match fen::load_fen_state(fen.to_string()) {
+        Ok(state) => state,
+        Err(err) => {
+            println!("Error! {}", err);
+            return;
+        }
+    };
 
-        let (friendly_piece_locations, friendly_movements) = generate_moves(
-            &fen_state.board,
-            &fen_state.color_to_move,
-            &fen_state.is_able_to_castle,
-            &squares_to_edge,
-        );
-        let (enemy_piece_locations, enemy_movements) = generate_moves(
-            &fen_state.board,
-            match &fen_state.color_to_move {
-                PieceColor::White => &PieceColor::Black,
-                PieceColor::Black => &PieceColor::White,
-                PieceColor::None => &PieceColor::White, // this will never happen so its safe to
-                                                        // ignore it.
-            },
-            &fen_state.is_able_to_castle,
-            &squares_to_edge,
-        );
-        ////////////////////////////////////
-        let has_check = detect_check(&friendly_piece_locations, &enemy_movements);
-        let pinned_pieces =
-            find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
-        ////////////////////////////////////
-        display::display_chess_tui(&fen_state, &friendly_movements);
+    let (_, friendly_movements) = generate_moves(
+        &fen_state.board,
+        &fen_state.color_to_move,
+        &fen_state.is_able_to_castle,
+        &squares_to_edge,
+    );
+    ////////////////////////////////////
+    let pinned_pieces =
+        find_pinned_pieces_in_board(&fen_state.board, &friendly_movements, &squares_to_edge);
+    ////////////////////////////////////
 
-        let mut previous_move: Option<(Move, BoardPiece)> = None;
-        loop {
-            let friendly = if let Some(check) = has_check {
-                if check {
-                    if let Some(previous_move) = previous_move {
-                        match unmake_move(&mut fen_state.board, previous_move) {
-                            Ok(()) => {
-                                println!("In check, unmade move.");
-                                Some(generate_moves(
-                                    &fen_state.board,
-                                    &fen_state.color_to_move,
-                                    &fen_state.is_able_to_castle,
-                                    &squares_to_edge,
-                                ))
-                            }
-                            Err(err) => {
-                                println!("Error. {}", err);
-                                None
-                            }
-                        }
-                    } else {
-                        Some(generate_moves(
+    /////////////////// GAME LOOP ////////////////////
+    let mut previous_move: Option<(Move, BoardPiece)> = None;
+    loop {
+        let friendly = move_based_on_check(&mut fen_state, &squares_to_edge, previous_move);
+        if let Some(friendly) = friendly {
+            let (_, friendly_movements) = friendly;
+            display::display_chess_tui(&fen_state, &friendly_movements);
+
+            let notation = get_user_input().expect("Failed to scan notation.");
+
+            previous_move =
+                match make_move(&mut fen_state.board, &friendly_movements, notation.as_str()) {
+                    Ok(mov) => {
+                        println!("Moved to {}", notation);
+                        // fen_state.color_to_move = switch_color(fen_state.color_to_move);
+                        Some(mov)
+                    }
+                    Err(err) => {
+                        println!("{}", err);
+                        None
+                    }
+                };
+        }
+        println!("Elapsed time: {:.2?}", before.elapsed());
+    }
+}
+
+fn move_based_on_check(
+    fen_state: &mut ChessState,
+    sqs_to_edge: &SquaresToEdge,
+    previous_move: Option<(Move, BoardPiece)>,
+) -> Option<(Vec<(ChessPieces, usize)>, Vec<Move>)> {
+    let (friendly_piece_locations, _) = generate_moves(
+        &fen_state.board,
+        &fen_state.color_to_move,
+        &fen_state.is_able_to_castle,
+        &sqs_to_edge,
+    );
+    let (_, enemy_movements) = generate_moves(
+        &fen_state.board,
+        match &fen_state.color_to_move {
+            PieceColor::White => &PieceColor::Black,
+            PieceColor::Black => &PieceColor::White,
+            PieceColor::None => &PieceColor::White, // this will never happen so its safe to
+                                                    // ignore it.
+        },
+        &fen_state.is_able_to_castle,
+        &sqs_to_edge,
+    );
+    let has_check = detect_check(&friendly_piece_locations, &enemy_movements);
+    if let Some(check) = has_check {
+        if check {
+            if let Some(previous_move) = previous_move {
+                match unmake_move(&mut fen_state.board, previous_move) {
+                    Ok(()) => {
+                        println!("In check, unmade move.");
+                        let mov = Some(generate_moves(
                             &fen_state.board,
                             &fen_state.color_to_move,
                             &fen_state.is_able_to_castle,
-                            &squares_to_edge,
-                        ))
+                            &sqs_to_edge,
+                        ));
+                        return mov;
                     }
-                } else {
-                    Some(generate_moves(
-                        &fen_state.board,
-                        &fen_state.color_to_move,
-                        &fen_state.is_able_to_castle,
-                        &squares_to_edge,
-                    ))
+                    Err(err) => {
+                        println!("Error. {}", err);
+                        return None;
+                    }
                 }
-            } else {
-                Some(generate_moves(
-                    &fen_state.board,
-                    &fen_state.color_to_move,
-                    &fen_state.is_able_to_castle,
-                    &squares_to_edge,
-                ))
-            };
-            if let Some(friendly) = friendly {
-                let (_, friendly_movements) = friendly;
-                display::display_chess_tui(&fen_state, &friendly_movements);
-
-                let notation = get_user_input().expect("Failed to scan notation.");
-
-                previous_move =
-                    match make_move(&mut fen_state.board, &friendly_movements, notation.as_str()) {
-                        Ok(mov) => {
-                            println!("Moved to {}", notation);
-                            Some(mov)
-                        }
-                        Err(err) => {
-                            println!("{}", err);
-                            None
-                        }
-                    };
             }
         }
-
-        /*
-        if let Some(last_move) = last_move {
-            match unmake_move(&mut fen_state.board, last_move) {
-                Ok(()) => {
-                    println!("Unmade move {}", notation);
-                    let (_, friendly_movements) = generate_moves(
-                        &fen_state.board,
-                        &fen_state.color_to_move,
-                        &fen_state.is_able_to_castle,
-                        &squares_to_edge,
-                    );
-                    display::display_chess_tui(&fen_state, &friendly_movements);
-                },
-                Err(err) => println!("{}", err),
-            }
-        }
-        */
     }
-    println!("Elapsed time: {:.2?}", before.elapsed());
+
+    fen_state.color_to_move = switch_color(fen_state.color_to_move);
+    Some(generate_moves(
+        &fen_state.board,
+        &fen_state.color_to_move,
+        &fen_state.is_able_to_castle,
+        &sqs_to_edge,
+    ))
 }
 
 fn get_user_input() -> Result<String, &'static str> {

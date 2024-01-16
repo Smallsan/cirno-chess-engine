@@ -27,6 +27,12 @@ pub fn generate_king_moves(
     ];
     let start_piece = board[start_square];
 
+    // this relies on the piece's square
+    //
+    // which means it actually scans the piece's rank and file
+    // rather than the board's rank and file
+    //
+    // not a big deal since this bug will be caught by the FEN castling flag
     let (start_rank, start_file) = (start_square / 8, start_square % 8);
     // rank = horizontal
     // file = vertical

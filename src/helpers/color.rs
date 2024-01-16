@@ -17,6 +17,10 @@ pub fn is_opponent_color(piece_color: &PieceColor, other_piece_color: &PieceColo
     }
 }
 
-pub fn is_not_empty(piece_color: &PieceColor) -> bool {
-    piece_color != &PieceColor::None
+pub fn switch_color(piece_color: PieceColor) -> PieceColor {
+    match piece_color {
+        PieceColor::White => PieceColor::Black,
+        PieceColor::Black => PieceColor::White,
+        PieceColor::None => unreachable!(),
+    }
 }
