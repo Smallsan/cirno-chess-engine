@@ -12,12 +12,13 @@ pub struct ChessState {
 /**
  * Castling no work yet!
  * Castling checks no work yet!
+ *
  */
 pub fn make_move(
     board: &mut [BoardPiece; 64],
     friendly_movements: &Vec<Move>,
     notation: &str,
-) -> Result<(Move, BoardPiece), &'static str> {
+) -> Result<(Move, BoardPiece, BoardPiece), &'static str> {
     let (start_square_index, end_square_index) = algebraic_notation_decoder(notation)?;
     let moves = friendly_movements.iter().find(|moves| {
         (moves.start_square as u32, moves.target_square as u32)
@@ -25,7 +26,7 @@ pub fn make_move(
     });
     match moves {
         Some(moves) => {
-            let piece = (moves.clone(), board[start_square_index as usize].clone());
+            let piece = (moves.clone(), board[start_square_index as usize].clone(), board[end_square_index as usize].clone());
             board[end_square_index as usize] = board[start_square_index as usize].clone();
             board[start_square_index as usize] = BoardPiece {
                 ..Default::default() // Empty.
@@ -38,17 +39,15 @@ pub fn make_move(
 
 pub fn unmake_move(
     board: &mut [BoardPiece; 64],
-    piece_and_move: (Move, BoardPiece),
+    piece_and_move: (Move, BoardPiece, BoardPiece),
 ) -> Result<(), &'static str> {
-    let (move_, board_piece) = piece_and_move;
+    let (move_, starting_piece, eaten_piece) = piece_and_move;
 
     if move_.start_square >= 64 || move_.target_square >= 64 {
         Err("Out of bounds!")
     } else {
-        board[move_.start_square as usize] = board_piece;
-        board[move_.target_square as usize] = BoardPiece {
-            ..Default::default() // Empty.
-        };
+        board[move_.start_square as usize] = starting_piece;
+        board[move_.target_square as usize] = eaten_piece;
         Ok(())
     }
 }
@@ -70,8 +69,8 @@ fn convert_algebraic_snippet(notation: &str) -> Result<u32, &'static str> {
         match ch {
             '1'..='8' => rank = ch.to_digit(10).unwrap() - 1, // 0 indexed
             'A'..='H' | 'a'..='h' => file = map_char_to_number(ch).unwrap() - 1, // 0 indexed
-            '\r' | '\n' => {},
-            _ => return Err("Invalid notation!")
+            '\r' | '\n' => {}
+            _ => return Err("Invalid notation!"),
         }
     }
     Ok(rank * 8 + file)

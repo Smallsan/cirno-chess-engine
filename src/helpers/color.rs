@@ -17,7 +17,7 @@ pub fn is_opponent_color(piece_color: &PieceColor, other_piece_color: &PieceColo
     }
 }
 
-pub fn switch_color(piece_color: PieceColor) -> PieceColor {
+pub fn switch_color(piece_color: &PieceColor) -> PieceColor {
     match piece_color {
         PieceColor::White => PieceColor::Black,
         PieceColor::Black => PieceColor::White,
