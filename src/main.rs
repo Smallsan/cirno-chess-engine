@@ -56,7 +56,7 @@ use std::time::Instant;
 // Castling might have the same issue as the check logic.
 //
 fn main() {
-    let fen = "8/pppppppp/8/8/8/8/PPPPPPPP/8 b HAha - 0 1";
+    let fen = "8/pppppppp/8/8/8/2K2r2/PPPPPPPP/8 b HAha - 0 1";
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
@@ -157,6 +157,7 @@ fn generate_moves_based_on_check(
                 ))
             }
         } else {
+            fen_state.color_to_move = switch_color(&fen_state.color_to_move);
             Some(generate_moves(
                 &fen_state.board,
                 &fen_state.color_to_move,
@@ -166,7 +167,6 @@ fn generate_moves_based_on_check(
         }
     } else {
         fen_state.color_to_move = switch_color(&fen_state.color_to_move);
-        // 
         Some(generate_moves(
             &fen_state.board,
             &fen_state.color_to_move,
