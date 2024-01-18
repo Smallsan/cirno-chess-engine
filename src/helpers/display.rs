@@ -27,12 +27,12 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
             7 => "h",
             _ => unreachable!(),
         };
-        print!(" {}  ", letter)
+        print!(" {} ", letter.truecolor(105, 105, 105))
     }
     println!("");
     for square in state.board {
         let newline = if print_index % 8 == 0 {
-            format!(" {}\n", print_index / 8)
+            format!(" {}\n", (print_index / 8).to_string().truecolor(105, 105, 105))
         } else {
             String::from("")
         };
@@ -40,24 +40,24 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
         let mut castling_moves = find_castling_moves(movement);
         castling_moves.extend(movement); // dirty hack by Small <3
                                          // Queens don't get displayed for no reason without this.
-
-        let move_str = if let Some(mo) = castling_moves.iter().find(|x| x.target_square == position)
+        let (r, g, b) = if let Some(mo) = castling_moves.iter().find(|x| x.target_square == position)
         {
             match mo.move_type {
-                MoveType::NoCapture => "%",
-                MoveType::Normal => "*",
-                MoveType::Castle => "&",
-                MoveType::EnPassant => "x",
-                MoveType::Promotion => "!",
-                MoveType::Piercing => "?",
+                MoveType::NoCapture => (153, 204, 255),
+                MoveType::Normal => (255, 80, 80),
+                MoveType::Castle => (255, 80, 80),
+                MoveType::EnPassant => (255, 80, 80),
+                MoveType::Promotion => (255, 255, 255),
+                MoveType::Piercing => (255, 255, 255),
             }
         } else {
-            " "
+            (150, 150, 150)
         };
 
-        let mut piece = format_piece(square);
-        piece.insert_str(0, move_str);
-        print!("[{}]{}", piece, newline);
+        let piece = ColoredString::from(format_piece(square));
+        let sq = format!("{}{}{}", "[".truecolor(r, g, b), piece, "]".truecolor(r, g, b)); 
+
+        print!("{}{}", sq, newline);
         print_index += 1;
         position += 1;
     }
@@ -71,7 +71,7 @@ fn find_castling_moves(moves: &Vec<Move>) -> Vec<&Move> {
         .collect()
 }
 
-pub fn format_piece(square: BoardPiece) -> String {
+pub fn format_piece(square: BoardPiece) -> ColoredString {
     return match square.piece_color {
         PieceColor::White => match square.piece_type {
             ChessPieces::Kings => format!("K"),
@@ -81,7 +81,7 @@ pub fn format_piece(square: BoardPiece) -> String {
             ChessPieces::Knights => format!("N"),
             ChessPieces::Pawns => format!("P"),
             ChessPieces::Empty => format!(" "),
-        },
+        }.on_white().black(),
         PieceColor::Black => match square.piece_type {
             ChessPieces::Kings => format!("k"),
             ChessPieces::Queens => format!("q"),
@@ -90,9 +90,9 @@ pub fn format_piece(square: BoardPiece) -> String {
             ChessPieces::Knights => format!("n"),
             ChessPieces::Pawns => format!("p"),
             ChessPieces::Empty => format!(" "),
-        },
+        }.on_black().white(),
         PieceColor::None => {
-            format!(" ")
+            ColoredString::from(format!(" "))
         }
     };
 }
