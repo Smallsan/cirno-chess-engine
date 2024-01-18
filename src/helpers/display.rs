@@ -1,6 +1,9 @@
 use crate::chess_state::ChessState;
 use crate::types::{BoardPiece, ChessPieces, Move, MoveType, PieceColor};
 
+// https://crates.io/crates/colored
+use colored::*;
+
 pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
     let turn_color = match state.color_to_move {
         PieceColor::White => "White",

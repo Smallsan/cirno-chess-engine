@@ -44,6 +44,7 @@ use std::time::Instant;
 // Pawn Pieces
 //      - En Passant
 //      - Promotions
+// Detect checkmate or stalemate
 //
 // BUGS:
 // Castling movement broken
@@ -133,8 +134,7 @@ fn generate_moves_based_on_check(
             if let Some(previous_move) = previous_move {
                 match unmake_move(&mut fen_state.board, previous_move) {
                     Ok(()) => {
-                        println!("In check, unmade move.");
-                        // fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+                        println!("Move resulted in a check, unmade move.");
                         let mov = Some(generate_moves(
                             &fen_state.board,
                             &fen_state.color_to_move,
