@@ -1,4 +1,7 @@
-use crate::{BoardPiece, Castle, Move, PieceColor, types::{MoveType, ChessPieces}};
+use crate::{
+    types::{ChessPieces, MoveType},
+    BoardPiece, Castle, Move, PieceColor,
+};
 
 #[derive(Debug)]
 pub struct ChessState {
@@ -21,14 +24,20 @@ pub fn make_move(
 ) -> Result<(Move, BoardPiece, BoardPiece), &'static str> {
     let (start_square_index, end_square_index) = algebraic_notation_decoder(notation)?;
     let moves = friendly_movements.iter().find(|moves| {
-        (moves.start_square as u32, moves.target_square as u32) == (start_square_index, end_square_index)
+        (moves.start_square as u32, moves.target_square as u32)
+            == (start_square_index, end_square_index)
     });
 
     match moves {
         Some(moves) => {
-            let piece = (moves.clone(), board[start_square_index as usize].clone(), board[end_square_index as usize].clone());
+            let piece = (
+                moves.clone(),
+                board[start_square_index as usize].clone(),
+                board[end_square_index as usize].clone(),
+            );
 
-            if piece.0.move_type == MoveType::NoCapture && piece.2.piece_type != ChessPieces::Empty {
+            if piece.0.move_type == MoveType::NoCapture && piece.2.piece_type != ChessPieces::Empty
+            {
                 return Err("Move not allowed due to NoCapture pawn behaviour.");
             }
 
