@@ -157,7 +157,6 @@ fn generate_moves_based_on_check(
                 ))
             }
         } else {
-            fen_state.color_to_move = switch_color(&fen_state.color_to_move);
             Some(generate_moves(
                 &fen_state.board,
                 &fen_state.color_to_move,
@@ -166,6 +165,7 @@ fn generate_moves_based_on_check(
             ))
         }
     } else {
+        fen_state.color_to_move = switch_color(&fen_state.color_to_move);
         // 
         Some(generate_moves(
             &fen_state.board,
