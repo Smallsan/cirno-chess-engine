@@ -56,7 +56,7 @@ use std::time::Instant;
 // Castling might have the same issue as the check logic.
 //
 fn main() {
-    let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b HAha - 0 1";
+    let fen = "8/pppppppp/8/8/8/8/PPPPPPPP/8 b HAha - 0 1";
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
 
