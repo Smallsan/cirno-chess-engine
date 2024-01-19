@@ -48,14 +48,11 @@ use std::io::stdin;
 use std::time::Instant;
 
 // TODO:
-// Pawn Pieces
-//      - En Passant
-//      - Promotions
-// Detect checkmate or stalemate
 // Board => FEN
 //
 // DOING:
-//      Stalemates
+//      Stalemates & Checkmates (Alice, post-movegen)
+//      En Passant & Promotions (Small, movegen)
 //
 // BUGS:
 // Castling movement broken
@@ -110,12 +107,15 @@ fn game_loop(
         );
     }
 
+    fen_state.color_to_move = switch_color(&fen_state.color_to_move);
     match unmake_move_based_on_check(&mut fen_state.board, previous_move, is_in_check) {
         Ok(()) => (),
-        Err(err) => println!("{}", err),
+        Err(err) => {
+            fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+            println!("{}", err)
+        },
     }
 
-    fen_state.color_to_move = switch_color(&fen_state.color_to_move);
 
     let (_, friendly_movements) = generate_moves(
         &fen_state.board,
