@@ -1,4 +1,5 @@
 use crate::{
+    chess_state::{make_move, unmake_move, ChessState},
     helpers::checks::{detect_check, unmake_move_based_on_check},
     types::{BoardPiece, ChessPieces},
     Move, chess_state::{make_move, unmake_move},
@@ -37,5 +38,4 @@ pub fn detect_stalemate(
             }
         };
     }
-
 }
