@@ -29,6 +29,7 @@ mod types;
 
 use chess_state::ChessState;
 
+use crate::chess_state::algebraic_notation_decoder;
 use crate::helpers::*;
 use crate::moves::*;
 use crate::types::*;
@@ -123,9 +124,10 @@ fn main() {
         display::display_chess_tui(&fen_state, &friendly_movements);
 
         let notation = get_user_input().expect("Failed to scan notation.");
+        let parsed_notation = algebraic_notation_decoder(&notation).unwrap();
 
         previous_move =
-            match make_move(&mut fen_state.board, &friendly_movements, notation.as_str()) {
+            match make_move(&mut fen_state.board, &friendly_movements, parsed_notation) {
                 Ok(mov) => {
                     println!("Moved to {}", notation);
                     Some(mov)

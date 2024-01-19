@@ -20,10 +20,10 @@ pub struct ChessState {
 pub fn make_move(
     board: &mut [BoardPiece; 64],
     friendly_movements: &Vec<Move>,
-    notation: &str,
+    sq_index: (u32, u32),
 ) -> Result<(Move, BoardPiece, BoardPiece), &'static str> {
     // separate this from make_move
-    let (start_square_index, end_square_index) = algebraic_notation_decoder(notation)?;
+    let (start_square_index, end_square_index) = sq_index;
     let moves = friendly_movements.iter().find(|moves| {
         (moves.start_square as u32, moves.target_square as u32)
             == (start_square_index, end_square_index)
@@ -67,7 +67,7 @@ pub fn unmake_move(
     }
 }
 
-fn algebraic_notation_decoder(notation: &str) -> Result<(u32, u32), &'static str> {
+pub fn algebraic_notation_decoder(notation: &str) -> Result<(u32, u32), &'static str> {
     if notation.is_empty() {
         return Err("Empty notation!");
     }

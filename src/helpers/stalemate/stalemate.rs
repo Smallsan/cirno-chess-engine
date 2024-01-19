@@ -22,20 +22,22 @@ pub fn detect_stalemate(
     // try every move and if there's at least one legal move,
     //      it's not a stalemate
 
-    let mut state = board.clone(); // it won't cost thaat much.
+    let mut board = board.clone(); // it won't cost thaat much.
 
     for (piece_type, piece_index) in friendly_piece_locations {
         // separate notation logic from make_move
-        match make_move(&mut board, &friendly_movements, notation.as_str()) {
+        /*
+        match make_move(&mut board, &friendly_movements, (*piece_index as u32, *piece_index as u32)) {
             Ok(previous_move) => {
-                let is_in_check = detect_check(friendly_piece_locations, enemy_movements);
-                unmake_move(&mut board, previous_move);
-                println!("Moved to {}", notation);
+                let _is_in_check = detect_check(friendly_piece_locations, enemy_movements);
+                let _ = unmake_move(&mut board, previous_move);
+                println!("Moved to {:?}", previous_move.0);
             }
             Err(err) => {
                 println!("{}", err);
             }
         };
+        */
     }
 
 }
