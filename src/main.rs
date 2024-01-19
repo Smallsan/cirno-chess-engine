@@ -126,8 +126,13 @@ fn game_loop(
 
     display::display_chess_tui(&fen_state, &friendly_movements);
 
-    let user_input = get_user_move()
-        .map_err(|_| GameError::UserMoveError("Failed to get user move".to_string()))?;
+    let user_input = match get_user_move() {
+        Ok(input) => input,
+        Err(_) => {
+            fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+            return Err(GameError::UserMoveError("Failed to get user move".to_string()));
+        },
+    };
 
     let (start_square_index, end_square_index) = algebraic_notation_decoder(&user_input)
         .map_err(|_| GameError::NotationDecoderError("Failed to decode notation".to_string()))?;

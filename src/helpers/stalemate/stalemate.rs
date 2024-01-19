@@ -31,7 +31,7 @@ pub fn detect_stalemate(
             Ok(previous_move) => {
                 let _is_in_check = detect_check(friendly_piece_locations, enemy_movements);
                 let _ = unmake_move(&mut board, previous_move);
-                println!("Moved to {:?}", previous_move.0);
+                // println!("Moved to {:?}", previous_move.0);
             }
             Err(err) => {
                 println!("{}", err);
