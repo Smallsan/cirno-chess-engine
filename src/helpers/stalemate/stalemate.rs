@@ -2,7 +2,7 @@ use crate::{
     chess_state::{make_move, unmake_move, ChessState},
     helpers::checks::{detect_check, unmake_move_based_on_check},
     types::{BoardPiece, ChessPieces},
-    Move,
+    Move, chess_state::{make_move, unmake_move},
 };
 
 /**
@@ -25,10 +25,9 @@ pub fn detect_stalemate(
 
     let mut board = board.clone(); // it won't cost thaat much.
 
-    for (piece_type, piece_index) in friendly_piece_locations {
+    for mov in friendly_movements {
         // separate notation logic from make_move
-        /*
-        match make_move(&mut board, &friendly_movements, (*piece_index as u32, *piece_index as u32)) {
+        match make_move(&mut board, &friendly_movements, (mov.start_square as u32, mov.target_square as u32)) {
             Ok(previous_move) => {
                 let _is_in_check = detect_check(friendly_piece_locations, enemy_movements);
                 let _ = unmake_move(&mut board, previous_move);
@@ -38,6 +37,5 @@ pub fn detect_stalemate(
                 println!("{}", err);
             }
         };
-        */
     }
 }
