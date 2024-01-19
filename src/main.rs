@@ -29,12 +29,15 @@ mod types;
 
 use chess_state::ChessState;
 
-use crate::chess_state::make_move;
-use crate::chess_state::unmake_move;
-use crate::helpers::color::switch_color;
 use crate::helpers::*;
 use crate::moves::*;
 use crate::types::*;
+
+use crate::helpers::color::switch_color;
+use crate::helpers::stalemate::stalemate::detect_stalemate;
+use crate::helpers::checks::unmake_move_based_on_check;
+use crate::chess_state::make_move;
+use crate::chess_state::unmake_move;
 
 use std::io::stdin;
 use std::time::Instant;
@@ -84,17 +87,31 @@ fn main() {
             &squares_to_edge,
         );
         let is_in_check = checks::detect_check(&friendly_piece_locations, &enemy_movements);
-        // we're using pseudo-legal movegen 
-        //      so we need to look ahead of the board by at least 1 depth
+        // we're using pseudo-legal movegen
+        //      so we need to look ahead of the board by at least 1 ply
         //      to detect stalemates
         //
         //      which means we have to try every single move.
-        let is_in_stalemate = stalemate::stalemate::detect_stalemate(&friendly_movements, is_in_check);
+        if !is_in_check {
+            let is_in_stalemate = detect_stalemate(
+                &fen_state.board,
+                &friendly_piece_locations,
+                &friendly_movements,
+                &enemy_movements,
+            );
+        }
 
-        let (_, friendly_movements) = match generate_moves_based_on_check(&mut fen_state, &squares_to_edge, previous_move, is_in_check) {
-            Some(friendly) => friendly,
-            None => {
+        let (_, friendly_movements) = match unmake_move_based_on_check(
+            &mut fen_state.board,
+            previous_move,
+            is_in_check,
+        ) {
+            Ok(()) => {
                 fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+                generate_moves(&fen_state.board, &fen_state.color_to_move, &fen_state.is_able_to_castle, &squares_to_edge)
+            },
+            Err(err) => {
+                println!("{}", err);
                 generate_moves(
                     &fen_state.board,
                     &fen_state.color_to_move,
@@ -131,40 +148,6 @@ fn get_user_input() -> Result<String, &'static str> {
 
     Ok(input)
 }
-
-/**
- * Unmakes moves on check.
- */
-fn generate_moves_based_on_check(
-    fen_state: &mut ChessState,
-    sqs_to_edge: &SquaresToEdge,
-    previous_move: Option<(Move, BoardPiece, BoardPiece)>,
-    is_in_check: bool,
-) -> Option<(Vec<(ChessPieces, usize)>, Vec<Move>)> {
-    if is_in_check {
-        if let Some(previous_move) = previous_move {
-            match unmake_move(&mut fen_state.board, previous_move) {
-                Ok(()) => {
-                    println!("Move resulted in a check, unmade move.");
-                    let mov = Some(generate_moves(
-                        &fen_state.board,
-                        &fen_state.color_to_move,
-                        &fen_state.is_able_to_castle,
-                        &sqs_to_edge,
-                    ));
-                    return mov;
-                }
-                Err(err) => {
-                    println!("Error. {}", err);
-                    return None;
-                }
-            }
-        } 
-    } 
-    None
-}
-
-
 
 /**
  * Generates available moves.

@@ -1,4 +1,4 @@
-use crate::{BoardPiece, Move, SquaresToEdge, ChessPieces, PieceColor};
+use crate::{BoardPiece, ChessPieces, Move, PieceColor, SquaresToEdge};
 
 /**
  * Unimplemented: What direction a piece can go in the pin.

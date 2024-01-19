@@ -22,6 +22,7 @@ pub fn make_move(
     friendly_movements: &Vec<Move>,
     notation: &str,
 ) -> Result<(Move, BoardPiece, BoardPiece), &'static str> {
+    // separate this from make_move
     let (start_square_index, end_square_index) = algebraic_notation_decoder(notation)?;
     let moves = friendly_movements.iter().find(|moves| {
         (moves.start_square as u32, moves.target_square as u32)

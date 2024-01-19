@@ -3,7 +3,7 @@ use crate::types::{BoardPiece, Castle, ChessPieces, PieceColor};
 use std::collections::HashMap;
 
 /**
- * Doesn't support the entire FEN string yet. 
+ * Doesn't support the entire FEN string yet.
  * Halfmoves (essential for tracking stalemates) don't work yet.
  */
 pub fn load_fen_state(fen: String) -> Result<ChessState, &'static str> {

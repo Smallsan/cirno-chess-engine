@@ -45,4 +45,3 @@ pub fn generate_sliding_pieces(
         }
     }
 }
-
