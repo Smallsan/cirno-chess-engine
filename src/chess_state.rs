@@ -20,10 +20,9 @@ pub struct ChessState {
 pub fn make_move(
     board: &mut [BoardPiece; 64],
     friendly_movements: &Vec<Move>,
-    sq_index: (u32, u32),
+    start_square_index: u32,
+    end_square_index: u32,
 ) -> Result<(Move, BoardPiece, BoardPiece), &'static str> {
-    // separate this from make_move
-    let (start_square_index, end_square_index) = sq_index;
     let moves = friendly_movements.iter().find(|moves| {
         (moves.start_square as u32, moves.target_square as u32)
             == (start_square_index, end_square_index)
@@ -77,7 +76,7 @@ pub fn algebraic_notation_decoder(notation: &str) -> Result<(u32, u32), &'static
     Ok((start_square_index, end_square_index))
 }
 
-fn convert_algebraic_snippet(notation: &str) -> Result<u32, &'static str> {
+pub fn convert_algebraic_snippet(notation: &str) -> Result<u32, &'static str> {
     let mut file = 0;
     let mut rank = 0;
     for ch in notation.chars() {
