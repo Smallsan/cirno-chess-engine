@@ -29,7 +29,7 @@ mod moves;
 mod types;
 
 use chess_state::ChessState;
-use helpers::stalemate::stalemate::Mate;
+use helpers::mate::{Mate, detect_mate};
 
 use crate::error_types::GameError;
 
@@ -38,26 +38,23 @@ use crate::helpers::*;
 use crate::moves::*;
 use crate::types::*;
 
-use crate::chess_state::make_move;
-use crate::chess_state::unmake_move;
+use crate::chess_state::{make_move, unmake_move};
 use crate::generate_moves::generate_moves;
 use crate::helpers::checks::unmake_move_based_on_check;
 use crate::helpers::color::switch_color;
-use crate::helpers::stalemate::stalemate::detect_mate;
 
 use std::io::stdin;
 use std::time::Instant;
 
-// TODO:
-// 
-//
 // DOING:
-//      Board => FEN (Alice, post-movegen)
-//      En Passant & Promotions (Small, movegen)
+//      Board => FEN, En Passant, Promotions, Castling Movement (Alice, post-movegen)
+//      FEN => Board. Reverse abcdefgh & switch kings and queens. (Small, movegen)
+//          - the fen is right, the decoder is wrong.
 //
 // BUGS:
 // Castling movement broken
 // Castling might have the same issue as the check logic.
+// Fix FEN board reversing everything.
 //
 fn main() {
     let stalemate = "6k1/b7/8/8/5p2/7p/7P/7K w - - 0 54";
@@ -171,7 +168,7 @@ fn game_loop(
 }
 
 fn load_fen_state(fen: String) -> ChessState {
-    match fen::load_fen_state(fen) {
+    match fen::encode::load_fen_state(fen) {
         Ok(state) => state,
         Err(err) => {
             println!("Error! {}", err);

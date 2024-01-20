@@ -46,18 +46,18 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
         let (r, g, b) =
             if let Some(mo) = castling_moves.iter().find(|x| x.target_square == position) {
                 match mo.move_type {
-                    MoveType::NoCapture => (153, 204, 255),
-                    MoveType::Normal => (255, 80, 80),
+                    MoveType::NoCapture => (146, 254, 144),
+                    MoveType::Normal => (146, 254, 144),
                     MoveType::Castle => (255, 80, 80),
-                    MoveType::EnPassant => (255, 80, 80),
+                    MoveType::EnPassant => (30, 0, 77),
                     MoveType::Promotion => (255, 255, 255),
                     MoveType::Piercing => (255, 255, 255),
                 }
             } else {
-                (150, 150, 150)
+                (100, 100, 100)
             };
 
-        let piece = ColoredString::from(format_piece(square));
+        let piece = format_piece(square);
         let sq = format!(
             "{}{}{}",
             "[".truecolor(r, g, b),
@@ -89,8 +89,7 @@ pub fn format_piece(square: BoardPiece) -> ColoredString {
             ChessPieces::Knights => format!("N"),
             ChessPieces::Pawns => format!("P"),
             ChessPieces::Empty => format!(" "),
-        }
-        .white(),
+        }.red(),
         PieceColor::Black => match square.piece_type {
             ChessPieces::Kings => format!("k"),
             ChessPieces::Queens => format!("q"),
@@ -99,8 +98,7 @@ pub fn format_piece(square: BoardPiece) -> ColoredString {
             ChessPieces::Knights => format!("n"),
             ChessPieces::Pawns => format!("p"),
             ChessPieces::Empty => format!(" "),
-        }
-        .white(),
+        }.blue(),
         PieceColor::None => ColoredString::from(format!(" ")),
     };
 }

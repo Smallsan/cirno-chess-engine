@@ -1,5 +1,4 @@
-pub mod stalemate;
-
+pub mod mate;
 pub mod checks;
 pub mod color;
 pub mod display;
