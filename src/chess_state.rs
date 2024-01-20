@@ -3,7 +3,7 @@ use crate::{
     BoardPiece, Castle, Move, PieceColor,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ChessState {
     pub board: [BoardPiece; 64],
     pub color_to_move: PieceColor,

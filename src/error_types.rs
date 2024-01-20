@@ -5,6 +5,9 @@ use std::error::Error;
 pub enum GameError {
     UserMoveError(String),
     NotationDecoderError(String),
+
+    // hijacked a bit to include ending a game by stalemate or checkmate
+    End(String)
 }
 
 impl fmt::Display for GameError {
@@ -12,6 +15,7 @@ impl fmt::Display for GameError {
         match self {
             GameError::UserMoveError(err) => write!(f, "User move error: {}", err),
             GameError::NotationDecoderError(err) => write!(f, "Notation decoder error: {}", err),
+            GameError::End(err) => write!(f, "End: {}", err),
         }
     }
 }

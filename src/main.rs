@@ -29,6 +29,7 @@ mod moves;
 mod types;
 
 use chess_state::ChessState;
+use helpers::stalemate::stalemate::Mate;
 
 use crate::error_types::GameError;
 
@@ -42,16 +43,16 @@ use crate::chess_state::unmake_move;
 use crate::generate_moves::generate_moves;
 use crate::helpers::checks::unmake_move_based_on_check;
 use crate::helpers::color::switch_color;
-use crate::helpers::stalemate::stalemate::detect_stalemate;
+use crate::helpers::stalemate::stalemate::detect_mate;
 
 use std::io::stdin;
 use std::time::Instant;
 
 // TODO:
-// Board => FEN
+// 
 //
 // DOING:
-//      Stalemates & Checkmates (Alice, post-movegen)
+//      Board => FEN (Alice, post-movegen)
 //      En Passant & Promotions (Small, movegen)
 //
 // BUGS:
@@ -59,20 +60,43 @@ use std::time::Instant;
 // Castling might have the same issue as the check logic.
 //
 fn main() {
-    let fen = "4k3/8/8/8/4P3/8/2q5/4K3 b - - 0 1";
+    let stalemate = "6k1/b7/8/8/5p2/7p/7P/7K w - - 0 54";
+    let checkmate = "6k1/b7/8/8/5p2/7p/7P/r6K w - - 0 54";
+    let normal = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+    let fen = normal;
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
-
     let mut fen_state = load_fen_state(fen.to_string());
 
-    let mut previous_move = None;
+    let (_, friendly_movements) = generate_moves(
+        &fen_state.board,
+        &fen_state.color_to_move,
+        &fen_state.is_able_to_castle,
+        &squares_to_edge,
+    );
+    display::display_chess_tui(&fen_state, &friendly_movements);
 
+    fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+
+    let mut previous_move = None;
     loop {
         let before = Instant::now();
 
+        // :D this is the interactable CLI!
         match game_loop(&mut fen_state, &squares_to_edge, previous_move) {
             Ok(move_made) => previous_move = move_made,
-            Err(err) => println!("Error: {}", err),
+            Err(err) => {
+                match err {
+                    GameError::End(end) => {
+                        println!("Game end: {}", end);
+                        break;
+                    },
+                    GameError::UserMoveError(err)
+                        | GameError::NotationDecoderError(err) => {
+                            println!("Error: {}", err)
+                        }
+                }
+            },
         }
 
         println!("Elapsed time: {:.2?}", before.elapsed());
@@ -84,6 +108,8 @@ fn game_loop(
     squares_to_edge: &[[i16; 8]; 64],
     previous_move: Option<(Move, BoardPiece, BoardPiece)>,
 ) -> Result<Option<(Move, BoardPiece, BoardPiece)>, GameError> {
+    fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+
     let (friendly_piece_locations, friendly_movements) = generate_moves(
         &fen_state.board,
         &fen_state.color_to_move,
@@ -96,26 +122,23 @@ fn game_loop(
         &fen_state.is_able_to_castle,
         squares_to_edge,
     );
-    let is_in_check = checks::detect_check(&friendly_piece_locations, &enemy_movements);
 
-    if !is_in_check {
-        let _is_in_stalemate = detect_stalemate(
-            &fen_state.board,
-            &friendly_piece_locations,
-            &friendly_movements,
-            &enemy_movements,
-        );
+    let is_in_check = checks::detect_check(&friendly_piece_locations, &enemy_movements);
+    let is_in_mate = detect_mate(&fen_state, &friendly_movements, &squares_to_edge, is_in_check);
+    match is_in_mate {
+        Mate::Stalemate => return Err(GameError::End("Stalemate!".to_string())),
+        Mate::Checkmate => return Err(GameError::End("Checkmate!".to_string())),
+        Mate::No => (),
     }
 
-    fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+
     match unmake_move_based_on_check(&mut fen_state.board, previous_move, is_in_check) {
         Ok(()) => (),
         Err(err) => {
             fen_state.color_to_move = switch_color(&fen_state.color_to_move);
             println!("{}", err)
-        },
+        }
     }
-
 
     let (_, friendly_movements) = generate_moves(
         &fen_state.board,
@@ -123,15 +146,16 @@ fn game_loop(
         &fen_state.is_able_to_castle,
         &squares_to_edge,
     );
-
     display::display_chess_tui(&fen_state, &friendly_movements);
 
     let user_input = match get_user_move() {
         Ok(input) => input,
         Err(_) => {
             fen_state.color_to_move = switch_color(&fen_state.color_to_move);
-            return Err(GameError::UserMoveError("Failed to get user move".to_string()));
-        },
+            return Err(GameError::UserMoveError(
+                "Failed to get user move".to_string(),
+            ));
+        }
     };
 
     let (start_square_index, end_square_index) = algebraic_notation_decoder(&user_input)

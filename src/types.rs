@@ -48,7 +48,7 @@ pub struct Move {
     pub move_type: MoveType,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Castle {
     pub queenside: bool,
     pub kingside: bool,
