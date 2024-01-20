@@ -50,6 +50,8 @@ pub struct Move {
 
 #[derive(Debug, Default, Clone)]
 pub struct Castle {
-    pub queenside: bool,
-    pub kingside: bool,
+    pub black_queenside: bool,
+    pub black_kingside: bool,
+    pub white_queenside: bool,
+    pub white_kingside: bool,
 }

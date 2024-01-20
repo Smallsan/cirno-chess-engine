@@ -25,7 +25,7 @@ pub fn load_fen_state(fen: String) -> Result<ChessState, &'static str> {
     for (i, &part) in fen.iter().skip(1).enumerate() {
         match i {
             0 => state.color_to_move = parse_turn(part)?,
-            1 => state.is_able_to_castle = parse_castle(part, state.color_to_move)?,
+            1 => state.is_able_to_castle = parse_castle(part)?,
             _ => {}
         }
     }
@@ -40,18 +40,22 @@ fn parse_turn(part: &str) -> Result<PieceColor, &'static str> {
     }
 }
 
-fn parse_castle(part: &str, color: PieceColor) -> Result<Castle, &'static str> {
+fn parse_castle(part: &str) -> Result<Castle, &'static str> {
     let mut castle = Castle {
-        queenside: false,
-        kingside: false,
+        black_queenside: false,
+        black_kingside: false,
+        white_queenside: false,
+        white_kingside: false,
     };
 
     for char in part.chars() {
-        if char == 'Q' && color == PieceColor::White || char == 'q' && color == PieceColor::Black {
-            castle.queenside = true;
-        }
-        if char == 'K' && color == PieceColor::White || char == 'k' && color == PieceColor::Black {
-            castle.kingside = true;
+        match char {
+            'Q' => castle.white_queenside = true,
+            'K' => castle.white_kingside = true,
+            'q' => castle.black_queenside = true,
+            'k' => castle.black_kingside = true,
+            '-' => (),
+            _ => return Err("Invalid castle notation!"),
         }
     }
     Ok(castle)

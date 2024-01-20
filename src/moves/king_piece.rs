@@ -1,6 +1,6 @@
 use crate::color::is_opponent_color;
 use crate::helpers::color::is_color;
-use crate::types::{BoardPiece, Castle, ChessPieces, Move, MoveType};
+use crate::types::{BoardPiece, Castle, ChessPieces, Move, MoveType, PieceColor};
 
 /**
  * King:
@@ -40,19 +40,20 @@ pub fn generate_king_moves(
     let first_square_of_rank = start_rank * 8;
     let last_square_of_rank = (start_rank + 1) * 8;
     let rank_range = first_square_of_rank..last_square_of_rank;
-    let castle = check_castle_condition(
+    let (queenside, kingside) = check_castle_condition(
         board.map(|f| f.piece_type)[rank_range].try_into().unwrap(),
         is_able_to_castle,
+        &start_piece.piece_color,
     );
 
-    if castle.queenside {
+    if queenside {
         moves.push(Move {
             start_square: start_square as i16,
             target_square: start_square as i16 - 2,
             move_type: MoveType::Castle,
         });
     }
-    if castle.kingside {
+    if kingside {
         moves.push(Move {
             start_square: start_square as i16,
             target_square: start_square as i16 + 2,
@@ -91,26 +92,23 @@ pub fn generate_king_moves(
 }
 
 // is_able_to_castle is a struct that's built from FEN and is modified by a piece moving.
-fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle) -> Castle {
-    let mut sides = Castle {
-        queenside: false,
-        kingside: false,
-    };
-    if is_able_to_castle.queenside {
+fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle, current_color: &PieceColor) -> (bool, bool) {
+    let mut sides = (false, false);
+    if is_able_to_castle.black_queenside && current_color == &PieceColor::Black {
         if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] =
             ranks
         {
-            sides.queenside = true;
+            sides.0 = true;
         } else {
-            sides.queenside = false;
+            sides.0 = false;
         }
     };
 
-    if is_able_to_castle.kingside {
+    if is_able_to_castle.black_kingside && current_color == &PieceColor::Black {
         if let [.., ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks] = ranks {
-            sides.kingside = true;
+            sides.1 = true;
         } else {
-            sides.kingside = false;
+            sides.1 = false;
         }
     };
     sides

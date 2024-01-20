@@ -47,13 +47,12 @@ use std::io::stdin;
 use std::time::Instant;
 
 // DOING:
-//      Board => FEN, En Passant, Promotions, Castling Movement (Alice, post-movegen)
-//      FEN => Board. Reverse abcdefgh & switch kings and queens. (Small, movegen)
+//      Board => FEN, En Passant, Promotions, Castling Movement [Doing!]    || (Alice, post-movegen)
+//      FEN => Board. Reverse abcdefgh & switch kings and queens.           || (Small, movegen)
 //          - the fen is right, the decoder is wrong.
 //
 // BUGS:
 // Castling movement broken
-// Castling might have the same issue as the check logic.
 // Fix FEN board reversing everything.
 //
 fn main() {
@@ -191,6 +190,17 @@ fn make_user_move(
         end_square_index,
     ) {
         Ok(move_made) => {
+            let start_piece = move_made.1;
+            if start_piece.piece_type == ChessPieces::Kings {
+                if start_piece.piece_color == PieceColor::White {
+                    fen_state.is_able_to_castle.white_kingside = false;
+                    fen_state.is_able_to_castle.white_queenside = false;
+                }
+                if start_piece.piece_color == PieceColor::Black {
+                    fen_state.is_able_to_castle.black_kingside = false;
+                    fen_state.is_able_to_castle.black_queenside = false;
+                }
+            }
             println!("Moved to {}", user_input);
             Some(move_made)
         }
