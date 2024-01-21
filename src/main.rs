@@ -51,8 +51,6 @@ use std::time::Instant;
 //      En Passant, Promotions  || (SMall, movegen)
 //
 // BUGS:
-// Castling movement broken
-// Fix FEN board reversing everything.
 //
 fn main() {
     let stalemate = "6k1/b7/8/8/5p2/7p/7P/7K w - - 0 54";
