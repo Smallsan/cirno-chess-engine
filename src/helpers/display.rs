@@ -15,7 +15,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
     let mut position = 0;
     print!("\n{turn_color}'s turn\n");
 
-    for i in 0..8 {
+    for i in (0..8).rev() {
         let letter = match i {
             0 => "a",
             1 => "b",
@@ -31,18 +31,15 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
     }
     println!("");
 
-    let reversed_board = state.board.iter().rev().collect::<Vec<_>>();
-
-    for square in reversed_board {
+    for square in state.board {
         let newline = if print_index % 8 == 0 {
             format!(
                 " {}\n",
-                (9 - print_index / 8).to_string().truecolor(105, 105, 105)
+                (print_index / 8).to_string().truecolor(105, 105, 105)
             )
         } else {
             String::from("")
         };
-
         let mut castling_moves = find_castling_moves(movement);
         castling_moves.extend(movement); // dirty hack by Small <3
                                          // Queens don't get displayed for no reason without this.
@@ -60,7 +57,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
                 (100, 100, 100)
             };
 
-        let piece = format_piece(*square);
+        let piece = format_piece(square);
         let sq = format!(
             "{}{}{}",
             "[".truecolor(r, g, b),
