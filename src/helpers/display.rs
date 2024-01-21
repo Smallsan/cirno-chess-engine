@@ -43,6 +43,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
         let mut castling_moves = find_castling_moves(movement);
         castling_moves.extend(movement); // dirty hack by Small <3
                                          // Queens don't get displayed for no reason without this.
+
         let (r, g, b) =
             if let Some(mo) = castling_moves.iter().find(|x| x.target_square == position) {
                 match mo.move_type {
