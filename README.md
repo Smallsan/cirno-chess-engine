@@ -4,7 +4,7 @@
 
 A programmer's first attempt at a full from scratch chess engine.
 
-En Passant and Promotions are not done yet. This is not ready to be used!
+En Passant and Promotions are not done yet. **This is not ready to be used!*
 
 ### Credits
 - Sebastian Lague for getting me into the world of chess programming.
