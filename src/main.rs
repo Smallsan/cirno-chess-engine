@@ -42,6 +42,7 @@ use crate::chess_state::make_move;
 use crate::generate_moves::generate_moves;
 use crate::helpers::color::switch_color;
 
+use std::borrow::BorrowMut;
 use std::io::stdin;
 use std::time::Instant;
 
@@ -83,7 +84,7 @@ fn main() {
         let before = Instant::now();
 
         // :D this is the interactable CLI!
-        match game_loop(&mut fen_state, &squares_to_edge, previous_chess_state) {
+        match game_loop(&mut fen_state, &squares_to_edge, previous_chess_state.clone()) {
             Ok(move_made) => previous_chess_state = move_made,
             Err(err) => {
                 match err {
@@ -137,7 +138,7 @@ fn game_loop(
     //
     if is_in_check {
         if let Some(previous_move) = previous_move {
-            fen_state = previous_move;
+            *fen_state = previous_move;
         }
         fen_state.color_to_move = switch_color(&fen_state.color_to_move);
         println!("Resulted in check.");
