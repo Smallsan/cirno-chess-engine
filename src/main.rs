@@ -70,8 +70,6 @@ fn main() {
         &fen_state.is_able_to_castle,
         &squares_to_edge,
     );
-    display::display_chess_tui(&fen_state, &friendly_movements);
-
     fen_state.color_to_move = switch_color(&fen_state.color_to_move);
 
     let mut previous_move = None;

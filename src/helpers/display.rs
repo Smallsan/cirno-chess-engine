@@ -30,11 +30,14 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
         print!(" {} ", letter.truecolor(105, 105, 105))
     }
     println!("");
-    for square in state.board {
+
+    let reversed_board = state.board.iter().rev().collect::<Vec<_>>();
+
+    for square in reversed_board {
         let newline = if print_index % 8 == 0 {
             format!(
                 " {}\n",
-                (print_index / 8).to_string().truecolor(105, 105, 105)
+                (9 - print_index / 8).to_string().truecolor(105, 105, 105)
             )
         } else {
             String::from("")
@@ -57,7 +60,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
                 (100, 100, 100)
             };
 
-        let piece = format_piece(square);
+        let piece = format_piece(*square);
         let sq = format!(
             "{}{}{}",
             "[".truecolor(r, g, b),
