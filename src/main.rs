@@ -85,7 +85,10 @@ fn main() {
 
         // :D this is the interactable CLI!
         match game_loop(&mut fen_state, &squares_to_edge, previous_chess_state.clone()) {
-            Ok(move_made) => previous_chess_state = move_made,
+            Ok(move_made) => {
+                previous_chess_state = Some(fen_state.clone());
+                fen_state = move_made.unwrap();
+            },
             Err(err) => {
                 match err {
                     GameError::End(end) => {
@@ -96,7 +99,11 @@ fn main() {
                         | GameError::NotationDecoderError(err) => {
                             println!("Error: {}", err)
                         }
+                    GameError::StateError(err) => {
+                        println!("Error: {}", err)
+                    }
                 }
+
             },
         }
 
@@ -137,15 +144,14 @@ fn game_loop(
     //      assigning it to current fen_state if a move isn't allowed.
     //
     if is_in_check {
-        if let Some(previous_move) = previous_move {
-            *fen_state = previous_move;
+        match previous_move {
+            Some(previous_state) => *fen_state = previous_state,
+            None => return Err(GameError::StateError("No previous state available".to_string())),
         }
-        fen_state.color_to_move = switch_color(&fen_state.color_to_move);
         println!("Resulted in check.");
     } else {
-
+    
     }
-
     let (_, friendly_movements) = generate_moves(
         &fen_state.board,
         &fen_state.color_to_move,
