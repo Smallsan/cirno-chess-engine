@@ -30,22 +30,53 @@ pub fn make_move(
 
     match moves {
         Some(moves) => {
-            let piece = (
-                moves.clone(),
-                board[start_square_index as usize].clone(),
-                board[end_square_index as usize].clone(),
-            );
+            let start_piece = board[start_square_index as usize];
+            let end_piece = board[end_square_index as usize];
 
-            if piece.0.move_type == MoveType::NoCapture && piece.2.piece_type != ChessPieces::Empty
+            if moves.move_type == MoveType::NoCapture && end_piece.piece_type != ChessPieces::Empty
             {
                 return Err("Move not allowed due to NoCapture pawn behaviour.");
             }
+            if moves.move_type == MoveType::Castle {
+                match start_piece.piece_color {
+                    PieceColor::White => {
+                        if end_square_index == 2 { // queenside
+                            board[2] = start_piece.clone();
+                            board[3] = board[0];
+                            board[2] = BoardPiece { ..Default::default() };
+                            board[0] = BoardPiece { ..Default::default() };
+                        }
+                        if end_square_index == 6 { // kingside
+                            board[6] = start_piece.clone();
+                            board[5] = board[7];
+                            board[6] = BoardPiece { ..Default::default() };
+                            board[7] = BoardPiece { ..Default::default() };
+                        }
+                    },
+                    PieceColor::Black => {
+                        // assuming rook positions to figure out queenside and kingside.
+                        if end_square_index == 58 { // queenside
+                            board[58] = start_piece.clone();
+                            board[59] = board[56].clone();
+                            board[58] = BoardPiece { ..Default::default() };
+                            board[56] = BoardPiece { ..Default::default() };
+                        }
+                        if end_square_index == 62 { // kingside
+                            board[62] = start_piece.clone();
+                            board[61] = board[63].clone();
+                            board[62] = BoardPiece { ..Default::default() };
+                            board[63] = BoardPiece { ..Default::default() };
+                        }
+                    },
+                    PieceColor::None => {}
+                }
+            }
 
-            board[end_square_index as usize] = board[start_square_index as usize].clone();
+            board[end_square_index as usize] = start_piece.clone();
             board[start_square_index as usize] = BoardPiece {
                 ..Default::default() // Empty.
             };
-            Ok(piece)
+            Ok((moves.clone(), start_piece.clone(), end_piece.clone()))
         }
         None => Err("Move not allowed."),
     }

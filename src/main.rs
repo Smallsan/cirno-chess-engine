@@ -48,8 +48,6 @@ use std::time::Instant;
 
 // DOING:
 //      Board => FEN, En Passant, Promotions, Castling Movement [Doing!]    || (Alice, post-movegen)
-//      FEN => Board. Reverse abcdefgh & switch kings and queens.           || (Small, movegen)
-//          - the fen is right, the decoder is wrong.
 //
 // BUGS:
 // Castling movement broken
@@ -59,7 +57,8 @@ fn main() {
     let stalemate = "6k1/b7/8/8/5p2/7p/7P/7K w - - 0 54";
     let checkmate = "6k1/b7/8/8/5p2/7p/7P/r6K w - - 0 54";
     let normal = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-    let fen = normal;
+    let castling = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
+    let fen = castling;
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
     let mut fen_state = load_fen_state(fen.to_string());
@@ -142,6 +141,7 @@ fn game_loop(
         &fen_state.is_able_to_castle,
         &squares_to_edge,
     );
+    println!("{:?}", &fen_state.is_able_to_castle);
     display::display_chess_tui(&fen_state, &friendly_movements);
 
     let user_input = match get_user_move() {
@@ -190,17 +190,43 @@ fn make_user_move(
         end_square_index,
     ) {
         Ok(move_made) => {
-            let start_piece = move_made.1;
-            if start_piece.piece_type == ChessPieces::Kings {
-                if start_piece.piece_color == PieceColor::White {
-                    fen_state.is_able_to_castle.white_kingside = false;
-                    fen_state.is_able_to_castle.white_queenside = false;
-                }
-                if start_piece.piece_color == PieceColor::Black {
-                    fen_state.is_able_to_castle.black_kingside = false;
-                    fen_state.is_able_to_castle.black_queenside = false;
-                }
+            let (mov, start_piece, _) = move_made;
+
+            // castling state editing logic
+            match start_piece.piece_color {
+                PieceColor::White => {
+                    if start_piece.piece_type == ChessPieces::Kings {
+                        fen_state.is_able_to_castle.white_kingside = false;
+                        fen_state.is_able_to_castle.white_queenside = false;
+                    }
+                    // assuming rook positions to figure out queenside and kingside.
+                    if start_piece.piece_type == ChessPieces::Rooks {
+                        if mov.start_square == 0 {
+                            fen_state.is_able_to_castle.white_queenside = false;
+                        }
+                        if mov.start_square == 7 {
+                            fen_state.is_able_to_castle.white_kingside = false;
+                        }
+                    }
+                },
+                PieceColor::Black => {
+                    if start_piece.piece_type == ChessPieces::Kings {
+                        fen_state.is_able_to_castle.black_kingside = false;
+                        fen_state.is_able_to_castle.black_queenside = false;
+                    }
+                    // assuming rook positions to figure out queenside and kingside.
+                    if start_piece.piece_type == ChessPieces::Rooks {
+                        if mov.start_square == 56 {
+                            fen_state.is_able_to_castle.white_queenside = false;
+                        }
+                        if mov.start_square == 63 {
+                            fen_state.is_able_to_castle.white_kingside = false;
+                        }
+                    }
+                },
+                PieceColor::None => {}
             }
+
             println!("Moved to {}", user_input);
             Some(move_made)
         }
