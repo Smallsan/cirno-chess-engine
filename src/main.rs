@@ -31,6 +31,7 @@ mod types;
 use chess_state::ChessState;
 use helpers::mate::{Mate, detect_mate};
 
+use crate::checks::detect_check;
 use crate::error_types::GameError;
 
 use crate::chess_state::algebraic_notation_decoder;
@@ -117,20 +118,28 @@ fn game_loop(
     previous_move: Option<ChessState>,
 ) -> Result<Option<ChessState>, GameError> {
 
+    let friendly_color = switch_color(&fen_state.color_to_move);
+
     let (friendly_piece_locations, _) = generate_moves(
         &fen_state.board,
-        &fen_state.color_to_move,
-        &fen_state.is_able_to_castle,
-        squares_to_edge,
-    );
-    let (_, enemy_movements) = generate_moves(
-        &fen_state.board,
-        &switch_color(&fen_state.color_to_move),
+        &friendly_color,
         &fen_state.is_able_to_castle,
         squares_to_edge,
     );
 
-    let is_in_check = checks::detect_check(&friendly_piece_locations, &enemy_movements);
+    let (_, enemy_movements) = generate_moves(
+        &fen_state.board,
+        &switch_color(&friendly_color),
+        &fen_state.is_able_to_castle,
+        squares_to_edge,
+    );
+
+    dbg!(&enemy_movements);
+
+    let is_in_check = detect_check(&friendly_piece_locations, &enemy_movements);
+
+    dbg!(&is_in_check);
+
     let is_in_mate = detect_mate(&fen_state, &squares_to_edge, is_in_check);
     match is_in_mate {
         Mate::Stalemate => return Err(GameError::End("Stalemate!".to_string())),
@@ -150,7 +159,7 @@ fn game_loop(
         }
         println!("Resulted in check.");
     } else {
-    
+        
     }
     let (_, friendly_movements) = generate_moves(
         &fen_state.board,
