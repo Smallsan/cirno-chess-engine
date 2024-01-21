@@ -4,6 +4,8 @@
 
 A programmer's first attempt at a full from scratch chess engine.
 
+En Passant and Promotions are not done yet. This is not ready to be used!
+
 ### Credits
 - Sebastian Lague for getting me into the world of chess programming.
 - Small for fixing castling, behaviour with attacked squares, pinned pieces, and more funky bugs.
