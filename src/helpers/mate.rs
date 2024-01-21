@@ -1,10 +1,9 @@
 use crate::{
-    chess_state::{make_move, unmake_move, ChessState},
+    chess_state::{make_move, ChessState},
     helpers::checks::detect_check,
     types::SquaresToEdge,
     generate_moves,
     switch_color,
-    Move
 };
 
 pub enum Mate {
@@ -20,7 +19,6 @@ pub enum Mate {
  */
 pub fn detect_mate(
     fen_state: &ChessState,
-    friendly_movements: &Vec<Move>,
     squares_to_edge: &SquaresToEdge,
     is_in_check: bool,
 ) -> Mate {
@@ -32,33 +30,36 @@ pub fn detect_mate(
     //      it's not a stalemate
     
     let mut fen_state = fen_state.clone(); // it won't cost thaat much.
+    fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+    let (_, friendly_movements) = generate_moves(
+        &fen_state.board,
+        &fen_state.color_to_move,
+        &fen_state.is_able_to_castle,
+        squares_to_edge,
+    );
 
     // somehow include checkmates into this.
     let trapped = friendly_movements.iter().all(|mov| {
         match make_move(
-            &mut fen_state.board,
+            &fen_state,
             &friendly_movements,
             mov.start_square as u32,
             mov.target_square as u32,
         ) {
-            Ok(previous_move) => {
+            Ok(modified_fen_state) => {
                 let (friendly_piece_locations, _) = generate_moves(
-                    &fen_state.board,
-                    &fen_state.color_to_move,
-                    &fen_state.is_able_to_castle,
+                    &modified_fen_state.board,
+                    &modified_fen_state.color_to_move,
+                    &modified_fen_state.is_able_to_castle,
                     squares_to_edge,
                 );
                 let (_, enemy_movements) = generate_moves(
-                    &fen_state.board,
-                    &switch_color(&fen_state.color_to_move),
-                    &fen_state.is_able_to_castle,
+                    &modified_fen_state.board,
+                    &switch_color(&modified_fen_state.color_to_move),
+                    &modified_fen_state.is_able_to_castle,
                     squares_to_edge,
                 );
                 let is_in_check = detect_check(&friendly_piece_locations, &enemy_movements);
-                match unmake_move(&mut fen_state.board, previous_move) {
-                    Ok(()) => (),
-                    Err(err) => println!("{}", err),
-                };
                 is_in_check
             }
             Err(err) => {

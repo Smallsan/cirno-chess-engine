@@ -38,9 +38,8 @@ use crate::helpers::*;
 use crate::moves::*;
 use crate::types::*;
 
-use crate::chess_state::{make_move, unmake_move};
+use crate::chess_state::make_move;
 use crate::generate_moves::generate_moves;
-use crate::helpers::checks::unmake_move_based_on_check;
 use crate::helpers::color::switch_color;
 
 use std::io::stdin;
@@ -51,13 +50,20 @@ use std::time::Instant;
 //      En Passant, Promotions  || (SMall, movegen)
 //
 // BUGS:
+//      Make move pre-maturely setting castle flags to false.
+//          i.e: moves king in a checked position => unmade move => castle flags becomes false
+//      Undo castling moves
+//
+//      SOLUTION: CLONE FEN STATE INSTEAD OF MOVES
+//
 //
 fn main() {
     let stalemate = "6k1/b7/8/8/5p2/7p/7P/7K w - - 0 54";
     let checkmate = "6k1/b7/8/8/5p2/7p/7P/r6K w - - 0 54";
     let normal = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
     let castling = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
-    let fen = castling;
+    let check = "rnbqkbnr/ppp1pppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
+    let fen = check;
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
     let mut fen_state = load_fen_state(fen.to_string());
@@ -72,13 +78,13 @@ fn main() {
 
     fen_state.color_to_move = switch_color(&fen_state.color_to_move);
 
-    let mut previous_move = None;
+    let mut previous_chess_state = None;
     loop {
         let before = Instant::now();
 
         // :D this is the interactable CLI!
-        match game_loop(&mut fen_state, &squares_to_edge, previous_move) {
-            Ok(move_made) => previous_move = move_made,
+        match game_loop(&mut fen_state, &squares_to_edge, previous_chess_state) {
+            Ok(move_made) => previous_chess_state = move_made,
             Err(err) => {
                 match err {
                     GameError::End(end) => {
@@ -100,11 +106,10 @@ fn main() {
 fn game_loop(
     fen_state: &mut ChessState,
     squares_to_edge: &[[i16; 8]; 64],
-    previous_move: Option<(Move, BoardPiece, BoardPiece)>,
-) -> Result<Option<(Move, BoardPiece, BoardPiece)>, GameError> {
-    fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+    previous_move: Option<ChessState>,
+) -> Result<Option<ChessState>, GameError> {
 
-    let (friendly_piece_locations, friendly_movements) = generate_moves(
+    let (friendly_piece_locations, _) = generate_moves(
         &fen_state.board,
         &fen_state.color_to_move,
         &fen_state.is_able_to_castle,
@@ -118,20 +123,26 @@ fn game_loop(
     );
 
     let is_in_check = checks::detect_check(&friendly_piece_locations, &enemy_movements);
-    let is_in_mate = detect_mate(&fen_state, &friendly_movements, &squares_to_edge, is_in_check);
+    let is_in_mate = detect_mate(&fen_state, &squares_to_edge, is_in_check);
     match is_in_mate {
         Mate::Stalemate => return Err(GameError::End("Stalemate!".to_string())),
         Mate::Checkmate => return Err(GameError::End("Checkmate!".to_string())),
         Mate::No => (),
-    }
+    };
 
-
-    match unmake_move_based_on_check(&mut fen_state.board, previous_move, is_in_check) {
-        Ok(()) => (),
-        Err(err) => {
-            fen_state.color_to_move = switch_color(&fen_state.color_to_move);
-            println!("{}", err)
+    fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+    // 
+    // we're storing the previous_state and 
+    //      assigning it to current fen_state if a move isn't allowed.
+    //
+    if is_in_check {
+        if let Some(previous_move) = previous_move {
+            fen_state = previous_move;
         }
+        fen_state.color_to_move = switch_color(&fen_state.color_to_move);
+        println!("Resulted in check.");
+    } else {
+
     }
 
     let (_, friendly_movements) = generate_moves(
@@ -181,53 +192,16 @@ fn make_user_move(
     start_square_index: u32,
     end_square_index: u32,
     user_input: String,
-) -> Option<(Move, BoardPiece, BoardPiece)> {
+) -> Option<ChessState> {
     match make_move(
-        &mut fen_state.board,
+        &fen_state,
         friendly_moves,
         start_square_index,
         end_square_index,
     ) {
-        Ok(move_made) => {
-            let (mov, start_piece, _) = move_made;
-
-            // castling state editing logic
-            match start_piece.piece_color {
-                PieceColor::White => {
-                    if start_piece.piece_type == ChessPieces::Kings {
-                        fen_state.is_able_to_castle.white_kingside = false;
-                        fen_state.is_able_to_castle.white_queenside = false;
-                    }
-                    // assuming rook positions to figure out queenside and kingside.
-                    if start_piece.piece_type == ChessPieces::Rooks {
-                        if mov.start_square == 0 {
-                            fen_state.is_able_to_castle.white_queenside = false;
-                        }
-                        if mov.start_square == 7 {
-                            fen_state.is_able_to_castle.white_kingside = false;
-                        }
-                    }
-                },
-                PieceColor::Black => {
-                    if start_piece.piece_type == ChessPieces::Kings {
-                        fen_state.is_able_to_castle.black_kingside = false;
-                        fen_state.is_able_to_castle.black_queenside = false;
-                    }
-                    // assuming rook positions to figure out queenside and kingside.
-                    if start_piece.piece_type == ChessPieces::Rooks {
-                        if mov.start_square == 56 {
-                            fen_state.is_able_to_castle.white_queenside = false;
-                        }
-                        if mov.start_square == 63 {
-                            fen_state.is_able_to_castle.white_kingside = false;
-                        }
-                    }
-                },
-                PieceColor::None => {}
-            }
-
+        Ok(state) => {
             println!("Moved to {}", user_input);
-            Some(move_made)
+            Some(state)
         }
         Err(err) => {
             fen_state.color_to_move = switch_color(&fen_state.color_to_move);

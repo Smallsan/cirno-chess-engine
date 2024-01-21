@@ -1,5 +1,5 @@
 use crate::{
-    generate_moves, unmake_move, BoardPiece, ChessPieces, ChessState, Move, SquaresToEdge,
+    generate_moves, BoardPiece, ChessPieces, ChessState, Move, SquaresToEdge,
 };
 
 /**
@@ -24,28 +24,4 @@ pub fn detect_check(
     } else {
         false
     }
-}
-
-/**
- * Unmakes moves on check.
- */
-pub fn unmake_move_based_on_check(
-    board: &mut [BoardPiece; 64],
-    previous_move: Option<(Move, BoardPiece, BoardPiece)>,
-    is_in_check: bool,
-) -> Result<(), &'static str> {
-    if is_in_check {
-        if let Some(previous_move) = previous_move {
-            match unmake_move(board, previous_move) {
-                Ok(()) => {
-                    return Err("Move resulted in a check, unmade move.");
-                }
-                Err(err) => {
-                    println!("Error. {}", err);
-                    return Err(err);
-                }
-            }
-        }
-    }
-    Ok(())
 }
