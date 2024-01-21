@@ -93,23 +93,34 @@ pub fn generate_king_moves(
 
 // is_able_to_castle is a struct that's built from FEN and is modified by a piece moving.
 fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle, current_color: &PieceColor) -> (bool, bool) {
-    let mut sides = (false, false);
-    if is_able_to_castle.black_queenside && current_color == &PieceColor::Black {
-        if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] =
-            ranks
-        {
-            sides.0 = true;
-        } else {
-            sides.0 = false;
-        }
-    };
-
-    if is_able_to_castle.black_kingside && current_color == &PieceColor::Black {
-        if let [.., ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks] = ranks {
-            sides.1 = true;
-        } else {
-            sides.1 = false;
-        }
-    };
-    sides
+    let mut queenside = false;
+    let mut kingside = false;
+    match current_color {
+        PieceColor::Black => {
+            if is_able_to_castle.black_queenside {
+                if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
+                    queenside = true;
+                }
+            }
+            if is_able_to_castle.black_kingside {
+                if let [.., ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks] = ranks {
+                    kingside = true;
+                }
+            }
+        },
+        PieceColor::White => {
+            if is_able_to_castle.white_queenside {
+                if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
+                    queenside = true;
+                }
+            }
+            if is_able_to_castle.white_kingside {
+                if let [.., ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Rooks] = ranks {
+                    kingside = true;
+                }
+            }
+        },
+        PieceColor::None => (),
+    }
+    (queenside, kingside)
 }
