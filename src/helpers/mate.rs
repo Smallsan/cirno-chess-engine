@@ -37,6 +37,7 @@ pub fn detect_mate(
         &fen_state.is_able_to_castle,
         squares_to_edge,
     );
+    dbg!(&friendly_movements);
 
     // somehow include checkmates into this.
     let trapped = friendly_movements.iter().all(|mov| {

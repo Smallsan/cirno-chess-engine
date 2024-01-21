@@ -64,7 +64,7 @@ fn main() {
     let normal = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
     let castling = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
     let check = "rnbqkbnr/ppp1pppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
-    let fen = check;
+    let fen = checkmate;
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
     let mut fen_state = load_fen_state(fen.to_string());
