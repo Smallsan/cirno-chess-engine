@@ -47,7 +47,8 @@ use std::io::stdin;
 use std::time::Instant;
 
 // DOING:
-//      Board => FEN, En Passant, Promotions, Castling Movement [Doing!]    || (Alice, post-movegen)
+//      Board => FEN,           || (Alice, post-movegen)
+//      En Passant, Promotions  || (SMall, movegen)
 //
 // BUGS:
 // Castling movement broken

@@ -37,6 +37,7 @@ pub fn make_move(
             {
                 return Err("Move not allowed due to NoCapture pawn behaviour.");
             }
+            // do unmake move later dear fucking god.
             if moves.move_type == MoveType::Castle {
                 match start_piece.piece_color {
                     PieceColor::White => {
