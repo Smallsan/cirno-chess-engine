@@ -29,7 +29,7 @@ mod moves;
 mod types;
 
 use chess_state::ChessState;
-use helpers::mate::{Mate, detect_mate};
+use helpers::mate::{detect_mate, Mate};
 
 use crate::checks::detect_check;
 use crate::error_types::GameError;
@@ -63,10 +63,11 @@ fn main() {
     let stalemate = "6k1/b7/8/8/5p2/7p/7P/7K w - - 0 54";
     let checkmate = "6k1/b7/8/8/5p2/7p/7P/r6K w - - 0 54";
     let en_passant = "rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPP1PPPP/RNBQKBNR w KQkq d6 0 4    ";
+    let promotion = "K6k/4P3/8/8/8/8/8/8 w - - 0 1    ";
     let normal = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
     let castling = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
     let check = "rnbqkbnr/ppp1pppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
-    let fen = en_passant;
+    let fen = promotion;
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
     let mut fen_state = load_fen_state(fen.to_string());
@@ -86,26 +87,26 @@ fn main() {
         let before = Instant::now();
 
         // :D this is the interactable CLI!
-        match game_loop(&mut fen_state, &squares_to_edge, previous_chess_state.clone()) {
+        match game_loop(
+            &mut fen_state,
+            &squares_to_edge,
+            previous_chess_state.clone(),
+        ) {
             Ok(move_made) => {
                 previous_chess_state = Some(fen_state.clone());
                 fen_state = move_made.unwrap();
-            },
-            Err(err) => {
-                match err {
-                    GameError::End(end) => {
-                        println!("Game end: {}", end);
-                        break;
-                    },
-                    GameError::UserMoveError(err)
-                        | GameError::NotationDecoderError(err) => {
-                            println!("Error: {}", err)
-                        }
-                    GameError::StateError(err) => {
-                        println!("Error: {}", err)
-                    }
+            }
+            Err(err) => match err {
+                GameError::End(end) => {
+                    println!("Game end: {}", end);
+                    break;
                 }
-
+                GameError::UserMoveError(err) | GameError::NotationDecoderError(err) => {
+                    println!("Error: {}", err)
+                }
+                GameError::StateError(err) => {
+                    println!("Error: {}", err)
+                }
             },
         }
 
@@ -118,7 +119,6 @@ fn game_loop(
     squares_to_edge: &[[i16; 8]; 64],
     previous_move: Option<ChessState>,
 ) -> Result<Option<ChessState>, GameError> {
-
     let friendly_color = switch_color(&fen_state.color_to_move);
 
     let (friendly_piece_locations, _) = generate_moves(
@@ -147,18 +147,21 @@ fn game_loop(
     };
 
     fen_state.color_to_move = switch_color(&fen_state.color_to_move);
-    // 
-    // we're storing the previous_state and 
+    //
+    // we're storing the previous_state and
     //      assigning it to current fen_state if a move isn't allowed.
     //
     if is_in_check {
         match previous_move {
             Some(previous_state) => *fen_state = previous_state,
-            None => return Err(GameError::StateError("No previous state available".to_string())),
+            None => {
+                return Err(GameError::StateError(
+                    "No previous state available".to_string(),
+                ))
+            }
         }
         println!("Resulted in check.");
     } else {
-        
     }
     let (_, friendly_movements) = generate_moves(
         &fen_state.en_passant_target,
@@ -167,7 +170,7 @@ fn game_loop(
         &fen_state.is_able_to_castle,
         &squares_to_edge,
     );
-    println!("{:?}", &fen_state.is_able_to_castle);
+    dbg!(&friendly_movements);
     display::display_chess_tui(&fen_state, &friendly_movements);
 
     let user_input = match get_user_move() {

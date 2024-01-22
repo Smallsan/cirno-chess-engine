@@ -1,6 +1,6 @@
 use crate::{
-    color, king_piece, knight_piece, pawn_piece, sliding_piece, types::SquaresToEdge, BoardPiece,
-    Castle, ChessPieces, Move, PieceColor, chess_state::ChessState,
+    chess_state::ChessState, color, king_piece, knight_piece, pawn_piece, sliding_piece,
+    types::SquaresToEdge, BoardPiece, Castle, ChessPieces, Move, PieceColor,
 };
 use core::cmp::min;
 

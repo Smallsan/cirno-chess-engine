@@ -8,7 +8,7 @@ pub enum GameError {
     StateError(String),
 
     // hijacked a bit to include ending a game by stalemate or checkmate
-    End(String)
+    End(String),
 }
 
 impl fmt::Display for GameError {

@@ -90,7 +90,8 @@ pub fn format_piece(square: BoardPiece) -> ColoredString {
             ChessPieces::Knights => format!("N"),
             ChessPieces::Pawns => format!("P"),
             ChessPieces::Empty => format!(" "),
-        }.red(),
+        }
+        .red(),
         PieceColor::Black => match square.piece_type {
             ChessPieces::Kings => format!("k"),
             ChessPieces::Queens => format!("q"),
@@ -99,7 +100,8 @@ pub fn format_piece(square: BoardPiece) -> ColoredString {
             ChessPieces::Knights => format!("n"),
             ChessPieces::Pawns => format!("p"),
             ChessPieces::Empty => format!(" "),
-        }.blue(),
+        }
+        .blue(),
         PieceColor::None => ColoredString::from(format!(" ")),
     };
 }

@@ -44,7 +44,9 @@ pub fn make_move(
                 } else {
                     end_square_index + 8
                 };
-                state.board[captured_square as usize] = BoardPiece { ..Default::default() };
+                state.board[captured_square as usize] = BoardPiece {
+                    ..Default::default()
+                };
             }
             //if moves.move_type == MoveType::Promotion {
             //    state.board[end_square_index as usize] = BoardPiece {
@@ -53,39 +55,58 @@ pub fn make_move(
             //    };
             //}
 
-
             // do unmake move later dear fucking god.
             if moves.move_type == MoveType::Castle {
                 match start_piece.piece_color {
                     PieceColor::White => {
-                        if end_square_index == 2 { // queenside
+                        if end_square_index == 2 {
+                            // queenside
                             state.board[2] = start_piece.clone();
                             state.board[3] = state.board[0];
-                            state.board[2] = BoardPiece { ..Default::default() };
-                            state.board[0] = BoardPiece { ..Default::default() };
+                            state.board[2] = BoardPiece {
+                                ..Default::default()
+                            };
+                            state.board[0] = BoardPiece {
+                                ..Default::default()
+                            };
                         }
-                        if end_square_index == 6 { // kingside
+                        if end_square_index == 6 {
+                            // kingside
                             state.board[6] = start_piece.clone();
                             state.board[5] = state.board[7];
-                            state.board[6] = BoardPiece { ..Default::default() };
-                            state.board[7] = BoardPiece { ..Default::default() };
+                            state.board[6] = BoardPiece {
+                                ..Default::default()
+                            };
+                            state.board[7] = BoardPiece {
+                                ..Default::default()
+                            };
                         }
-                    },
+                    }
                     PieceColor::Black => {
                         // assuming rook positions to figure out queenside and kingside.
-                        if end_square_index == 58 { // queenside
+                        if end_square_index == 58 {
+                            // queenside
                             state.board[58] = start_piece.clone();
                             state.board[59] = state.board[56].clone();
-                            state.board[58] = BoardPiece { ..Default::default() };
-                            state.board[56] = BoardPiece { ..Default::default() };
+                            state.board[58] = BoardPiece {
+                                ..Default::default()
+                            };
+                            state.board[56] = BoardPiece {
+                                ..Default::default()
+                            };
                         }
-                        if end_square_index == 62 { // kingside
+                        if end_square_index == 62 {
+                            // kingside
                             state.board[62] = start_piece.clone();
                             state.board[61] = state.board[63].clone();
-                            state.board[62] = BoardPiece { ..Default::default() };
-                            state.board[63] = BoardPiece { ..Default::default() };
+                            state.board[62] = BoardPiece {
+                                ..Default::default()
+                            };
+                            state.board[63] = BoardPiece {
+                                ..Default::default()
+                            };
                         }
-                    },
+                    }
                     PieceColor::None => {}
                 }
             }

@@ -78,19 +78,55 @@ fn load_position_from_fen(fen: String) -> Result<[BoardPiece; 64], &'static str>
                 file += letter.to_digit(10).unwrap();
             } else {
                 let piece_type = match letter {
-                    'P' => Ok(BoardPiece { piece_type: ChessPieces::Pawns, piece_color: PieceColor::White }),
-                    'K' => Ok(BoardPiece { piece_type: ChessPieces::Kings, piece_color: PieceColor::White }),
-                    'Q' => Ok(BoardPiece { piece_type: ChessPieces::Queens, piece_color: PieceColor::White }),
-                    'B' => Ok(BoardPiece { piece_type: ChessPieces::Bishops, piece_color: PieceColor::White }),
-                    'N' => Ok(BoardPiece { piece_type: ChessPieces::Knights, piece_color: PieceColor::White }),
-                    'R' => Ok(BoardPiece { piece_type: ChessPieces::Rooks, piece_color: PieceColor::White }),
+                    'P' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Pawns,
+                        piece_color: PieceColor::White,
+                    }),
+                    'K' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Kings,
+                        piece_color: PieceColor::White,
+                    }),
+                    'Q' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Queens,
+                        piece_color: PieceColor::White,
+                    }),
+                    'B' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Bishops,
+                        piece_color: PieceColor::White,
+                    }),
+                    'N' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Knights,
+                        piece_color: PieceColor::White,
+                    }),
+                    'R' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Rooks,
+                        piece_color: PieceColor::White,
+                    }),
 
-                    'p' => Ok(BoardPiece { piece_type: ChessPieces::Pawns, piece_color: PieceColor::Black }),
-                    'k' => Ok(BoardPiece { piece_type: ChessPieces::Kings, piece_color: PieceColor::Black }),
-                    'q' => Ok(BoardPiece { piece_type: ChessPieces::Queens, piece_color: PieceColor::Black }),
-                    'b' => Ok(BoardPiece { piece_type: ChessPieces::Bishops, piece_color: PieceColor::Black }),
-                    'n' => Ok(BoardPiece { piece_type: ChessPieces::Knights, piece_color: PieceColor::Black }),
-                    'r' => Ok(BoardPiece { piece_type: ChessPieces::Rooks, piece_color: PieceColor::Black }),
+                    'p' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Pawns,
+                        piece_color: PieceColor::Black,
+                    }),
+                    'k' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Kings,
+                        piece_color: PieceColor::Black,
+                    }),
+                    'q' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Queens,
+                        piece_color: PieceColor::Black,
+                    }),
+                    'b' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Bishops,
+                        piece_color: PieceColor::Black,
+                    }),
+                    'n' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Knights,
+                        piece_color: PieceColor::Black,
+                    }),
+                    'r' => Ok(BoardPiece {
+                        piece_type: ChessPieces::Rooks,
+                        piece_color: PieceColor::Black,
+                    }),
                     _ => Err("You probably got a wrong letter in your fen string."),
                 };
                 let index = usize::try_from(rank * 8 + file).unwrap();
@@ -98,7 +134,7 @@ fn load_position_from_fen(fen: String) -> Result<[BoardPiece; 64], &'static str>
                     Ok(piece) => board[index] = piece.to_owned(),
                     Err(err) => return Err(err),
                 }
-                
+
                 file += 1;
             }
         }

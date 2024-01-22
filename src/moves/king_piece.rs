@@ -92,13 +92,19 @@ pub fn generate_king_moves(
 }
 
 // is_able_to_castle is a struct that's built from FEN and is modified by a piece moving.
-fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle, current_color: &PieceColor) -> (bool, bool) {
+fn check_castle_condition(
+    ranks: &[ChessPieces; 8],
+    is_able_to_castle: &Castle,
+    current_color: &PieceColor,
+) -> (bool, bool) {
     let mut queenside = false;
     let mut kingside = false;
     match current_color {
         PieceColor::Black => {
             if is_able_to_castle.black_queenside {
-                if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
+                if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] =
+                    ranks
+                {
                     queenside = true;
                 }
             }
@@ -107,10 +113,12 @@ fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle, 
                     kingside = true;
                 }
             }
-        },
+        }
         PieceColor::White => {
             if is_able_to_castle.white_queenside {
-                if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] = ranks {
+                if let [ChessPieces::Rooks, ChessPieces::Empty, ChessPieces::Empty, ChessPieces::Empty, ..] =
+                    ranks
+                {
                     queenside = true;
                 }
             }
@@ -119,7 +127,7 @@ fn check_castle_condition(ranks: &[ChessPieces; 8], is_able_to_castle: &Castle, 
                     kingside = true;
                 }
             }
-        },
+        }
         PieceColor::None => (),
     }
     (queenside, kingside)

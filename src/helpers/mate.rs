@@ -1,9 +1,10 @@
 use crate::{
     chess_state::{make_move, ChessState},
-    helpers::checks::detect_check,
-    types::SquaresToEdge,
     generate_moves,
-    switch_color, Move,
+    helpers::checks::detect_check,
+    switch_color,
+    types::SquaresToEdge,
+    Move,
 };
 
 pub enum Mate {
@@ -31,7 +32,9 @@ pub fn detect_mate(
         squares_to_edge,
     );
 
-    let trapped = friendly_movements.iter().all(|mov| is_move_into_check(&friendly_movements, fen_state, mov, squares_to_edge));
+    let trapped = friendly_movements
+        .iter()
+        .all(|mov| is_move_into_check(&friendly_movements, fen_state, mov, squares_to_edge));
 
     match (trapped, is_in_check) {
         (true, true) => Mate::Checkmate,
@@ -39,7 +42,6 @@ pub fn detect_mate(
         _ => Mate::No,
     }
 }
-
 
 fn is_move_into_check(
     friendly_movements: &Vec<Move>,

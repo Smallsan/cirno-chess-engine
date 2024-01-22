@@ -1,6 +1,4 @@
-use crate::{
-    generate_moves, BoardPiece, ChessPieces, ChessState, Move, SquaresToEdge,
-};
+use crate::{generate_moves, BoardPiece, ChessPieces, ChessState, Move, SquaresToEdge};
 
 /**
  * Detects checks the friendly has.
