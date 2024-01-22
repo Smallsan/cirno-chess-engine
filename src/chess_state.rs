@@ -10,6 +10,7 @@ pub struct ChessState {
     pub is_able_to_castle: Castle,
     pub is_check: bool,
     pub pinned_pieces: Vec<BoardPiece>,
+    pub en_passant_target: Option<i16>,
 }
 
 /**
@@ -132,6 +133,7 @@ impl Default for ChessState {
             is_able_to_castle: Default::default(),
             pinned_pieces: vec![],
             is_check: false,
+            en_passant_target: None,
         }
     }
 }

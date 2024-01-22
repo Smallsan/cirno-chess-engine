@@ -62,21 +62,22 @@ use std::time::Instant;
 fn main() {
     let stalemate = "6k1/b7/8/8/5p2/7p/7P/7K w - - 0 54";
     let checkmate = "6k1/b7/8/8/5p2/7p/7P/r6K w - - 0 54";
+    let en_passant = "rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPP1PPPP/RNBQKBNR w KQkq d6 0 4    ";
     let normal = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
     let castling = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
     let check = "rnbqkbnr/ppp1pppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1";
-    let fen = checkmate;
+    let fen = en_passant;
 
     let squares_to_edge = generate_moves::precompute_squares_to_edge();
     let mut fen_state = load_fen_state(fen.to_string());
 
     let (_, friendly_movements) = generate_moves(
+        &fen_state,
         &fen_state.board,
         &fen_state.color_to_move,
         &fen_state.is_able_to_castle,
         &squares_to_edge,
     );
-    display::display_chess_tui(&fen_state, &friendly_movements);
 
     fen_state.color_to_move = switch_color(&fen_state.color_to_move);
 
@@ -121,6 +122,7 @@ fn game_loop(
     let friendly_color = switch_color(&fen_state.color_to_move);
 
     let (friendly_piece_locations, _) = generate_moves(
+        &fen_state,
         &fen_state.board,
         &friendly_color,
         &fen_state.is_able_to_castle,
@@ -128,17 +130,14 @@ fn game_loop(
     );
 
     let (_, enemy_movements) = generate_moves(
+        &fen_state,
         &fen_state.board,
         &switch_color(&friendly_color),
         &fen_state.is_able_to_castle,
         squares_to_edge,
     );
 
-    dbg!(&enemy_movements);
-
     let is_in_check = detect_check(&friendly_piece_locations, &enemy_movements);
-
-    dbg!(&is_in_check);
 
     let is_in_mate = detect_mate(&fen_state, &squares_to_edge, is_in_check);
     match is_in_mate {
@@ -162,6 +161,7 @@ fn game_loop(
         
     }
     let (_, friendly_movements) = generate_moves(
+        &fen_state,
         &fen_state.board,
         &fen_state.color_to_move,
         &fen_state.is_able_to_castle,

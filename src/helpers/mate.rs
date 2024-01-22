@@ -32,12 +32,12 @@ pub fn detect_mate(
     let mut fen_state = fen_state.clone(); // it won't cost thaat much.
     fen_state.color_to_move = switch_color(&fen_state.color_to_move);
     let (_, friendly_movements) = generate_moves(
+        &fen_state,
         &fen_state.board,
         &fen_state.color_to_move,
         &fen_state.is_able_to_castle,
         squares_to_edge,
     );
-    dbg!(&friendly_movements);
 
     // somehow include checkmates into this.
     let trapped = friendly_movements.iter().all(|mov| {
@@ -49,12 +49,14 @@ pub fn detect_mate(
         ) {
             Ok(modified_fen_state) => {
                 let (friendly_piece_locations, _) = generate_moves(
+                    &fen_state,
                     &modified_fen_state.board,
                     &modified_fen_state.color_to_move,
                     &modified_fen_state.is_able_to_castle,
                     squares_to_edge,
                 );
                 let (_, enemy_movements) = generate_moves(
+                    &fen_state,
                     &modified_fen_state.board,
                     &switch_color(&modified_fen_state.color_to_move),
                     &modified_fen_state.is_able_to_castle,

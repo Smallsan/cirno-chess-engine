@@ -1,6 +1,6 @@
 use crate::{
     color, king_piece, knight_piece, pawn_piece, sliding_piece, types::SquaresToEdge, BoardPiece,
-    Castle, ChessPieces, Move, PieceColor,
+    Castle, ChessPieces, Move, PieceColor, chess_state::ChessState,
 };
 use core::cmp::min;
 
@@ -38,6 +38,7 @@ pub fn precompute_squares_to_edge() -> SquaresToEdge {
  * Generates available moves.
  */
 pub fn generate_moves(
+    fen_state: &ChessState,
     board: &[BoardPiece; 64],
     current_player_color: &PieceColor,
     is_able_to_castle: &Castle,
@@ -74,6 +75,7 @@ pub fn generate_moves(
                         )
                     }
                     ChessPieces::Pawns => pawn_piece::generate_pawn_moves(
+                        fen_state,
                         start_square,
                         board,
                         current_player_color,

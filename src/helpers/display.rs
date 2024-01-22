@@ -50,7 +50,7 @@ pub fn display_chess_tui(state: &ChessState, movement: &Vec<Move>) {
                     MoveType::NoCapture => (146, 254, 144),
                     MoveType::Normal => (146, 254, 144),
                     MoveType::Castle => (255, 80, 80),
-                    MoveType::EnPassant => (30, 0, 77),
+                    MoveType::EnPassant => (204, 102, 0),
                     MoveType::Promotion => (255, 255, 255),
                     MoveType::Piercing => (255, 255, 255),
                 }
