@@ -25,11 +25,9 @@ pub fn detect_mate(
 ) -> Mate {
     let color_to_move = switch_color(&fen_state.color_to_move);
     let (_, friendly_movements) = generate_moves(
-        &fen_state.en_passant_target,
-        &fen_state.board,
-        &color_to_move,
-        &fen_state.is_able_to_castle,
+        &fen_state,
         squares_to_edge,
+        false,
     );
 
     let trapped = friendly_movements
@@ -57,18 +55,14 @@ fn is_move_into_check(
     ) {
         Ok(modified_fen_state) => {
             let (friendly_piece_locations, _) = generate_moves(
-                &fen_state.en_passant_target,
-                &modified_fen_state.board,
-                &modified_fen_state.color_to_move,
-                &modified_fen_state.is_able_to_castle,
+                &modified_fen_state,
                 squares_to_edge,
+                false,
             );
             let (_, enemy_movements) = generate_moves(
-                &fen_state.en_passant_target,
-                &modified_fen_state.board,
-                &switch_color(&modified_fen_state.color_to_move),
-                &modified_fen_state.is_able_to_castle,
+                &fen_state,
                 squares_to_edge,
+                true,
             );
             detect_check(&friendly_piece_locations, &enemy_movements)
         }

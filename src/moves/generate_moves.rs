@@ -1,6 +1,5 @@
 use crate::{
-    chess_state::ChessState, color, king_piece, knight_piece, pawn_piece, sliding_piece,
-    types::SquaresToEdge, BoardPiece, Castle, ChessPieces, Move, PieceColor,
+    chess_state::ChessState, color, fen, king_piece, knight_piece, pawn_piece, sliding_piece, types::SquaresToEdge, BoardPiece, Castle, ChessPieces, Move, PieceColor
 };
 use core::cmp::min;
 
@@ -38,14 +37,29 @@ pub fn precompute_squares_to_edge() -> SquaresToEdge {
  * Generates available moves.
  */
 pub fn generate_moves(
-    enpassant_target: &Option<i16>,
-    board: &[BoardPiece; 64],
-    current_player_color: &PieceColor,
-    is_able_to_castle: &Castle,
+    fen_state: &ChessState,
     sqs_to_edge: &SquaresToEdge,
+    switch_colors: bool,
 ) -> (Vec<(ChessPieces, usize)>, Vec<Move>) {
     let mut pieces = Vec::<(ChessPieces, usize)>::new();
     let mut moves = Vec::<Move>::new();
+
+    let enpassant_target = &fen_state.en_passant_target;
+    let board = &fen_state.board;
+    let is_able_to_castle = &fen_state.is_able_to_castle;
+    let current_player_color: &PieceColor;
+
+    if switch_colors {
+        match(fen_state.color_to_move) {
+            PieceColor::White => current_player_color = &PieceColor::Black,
+            PieceColor::Black => current_player_color = &PieceColor::White,
+            _ => current_player_color = &PieceColor::None,
+        }
+    }
+    else {
+        current_player_color = &fen_state.color_to_move;
+    }
+
 
     for start_square in 0..64 {
         // we're currently just caching all moves that a piece can do in a vector
@@ -75,7 +89,7 @@ pub fn generate_moves(
                         )
                     }
                     ChessPieces::Pawns => pawn_piece::generate_pawn_moves(
-                        enpassant_target,
+                        &enpassant_target,
                         start_square,
                         board,
                         current_player_color,

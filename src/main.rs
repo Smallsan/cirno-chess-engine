@@ -73,11 +73,9 @@ fn main() {
     let mut fen_state = load_fen_state(fen.to_string());
 
     let (_, friendly_movements) = generate_moves(
-        &fen_state.en_passant_target,
-        &fen_state.board,
-        &fen_state.color_to_move,
-        &fen_state.is_able_to_castle,
+        &fen_state,
         &squares_to_edge,
+        false,
     );
 
     fen_state.color_to_move = switch_color(&fen_state.color_to_move);
@@ -122,19 +120,15 @@ fn game_loop(
     let friendly_color = switch_color(&fen_state.color_to_move);
 
     let (friendly_piece_locations, _) = generate_moves(
-        &fen_state.en_passant_target,
-        &fen_state.board,
-        &friendly_color,
-        &fen_state.is_able_to_castle,
+        &fen_state,
         squares_to_edge,
+        false,
     );
 
     let (_, enemy_movements) = generate_moves(
-        &fen_state.en_passant_target,
-        &fen_state.board,
-        &switch_color(&friendly_color),
-        &fen_state.is_able_to_castle,
+        &fen_state,
         squares_to_edge,
+        true,
     );
 
     let is_in_check = detect_check(&friendly_piece_locations, &enemy_movements);
@@ -164,12 +158,11 @@ fn game_loop(
     } else {
     }
     let (_, friendly_movements) = generate_moves(
-        &fen_state.en_passant_target,
-        &fen_state.board,
-        &fen_state.color_to_move,
-        &fen_state.is_able_to_castle,
-        &squares_to_edge,
+        &fen_state,
+        squares_to_edge,
+        false,
     );
+
     dbg!(&friendly_movements);
     display::display_chess_tui(&fen_state, &friendly_movements);
 
