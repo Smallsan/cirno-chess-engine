@@ -38,7 +38,7 @@ pub fn precompute_squares_to_edge() -> SquaresToEdge {
  * Generates available moves.
  */
 pub fn generate_moves(
-    fen_state: &ChessState,
+    enpassant_target: &Option<i16>,
     board: &[BoardPiece; 64],
     current_player_color: &PieceColor,
     is_able_to_castle: &Castle,
@@ -75,7 +75,7 @@ pub fn generate_moves(
                         )
                     }
                     ChessPieces::Pawns => pawn_piece::generate_pawn_moves(
-                        fen_state,
+                        enpassant_target,
                         start_square,
                         board,
                         current_player_color,

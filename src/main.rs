@@ -72,7 +72,7 @@ fn main() {
     let mut fen_state = load_fen_state(fen.to_string());
 
     let (_, friendly_movements) = generate_moves(
-        &fen_state,
+        &fen_state.en_passant_target,
         &fen_state.board,
         &fen_state.color_to_move,
         &fen_state.is_able_to_castle,
@@ -122,7 +122,7 @@ fn game_loop(
     let friendly_color = switch_color(&fen_state.color_to_move);
 
     let (friendly_piece_locations, _) = generate_moves(
-        &fen_state,
+        &fen_state.en_passant_target,
         &fen_state.board,
         &friendly_color,
         &fen_state.is_able_to_castle,
@@ -130,7 +130,7 @@ fn game_loop(
     );
 
     let (_, enemy_movements) = generate_moves(
-        &fen_state,
+        &fen_state.en_passant_target,
         &fen_state.board,
         &switch_color(&friendly_color),
         &fen_state.is_able_to_castle,
@@ -161,7 +161,7 @@ fn game_loop(
         
     }
     let (_, friendly_movements) = generate_moves(
-        &fen_state,
+        &fen_state.en_passant_target,
         &fen_state.board,
         &fen_state.color_to_move,
         &fen_state.is_able_to_castle,

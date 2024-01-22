@@ -38,6 +38,22 @@ pub fn make_move(
             {
                 return Err("Move not allowed due to NoCapture pawn behaviour.");
             }
+            if moves.move_type == MoveType::EnPassant {
+                let captured_square = if start_piece.piece_color == PieceColor::White {
+                    end_square_index - 8
+                } else {
+                    end_square_index + 8
+                };
+                state.board[captured_square as usize] = BoardPiece { ..Default::default() };
+            }
+            //if moves.move_type == MoveType::Promotion {
+            //    state.board[end_square_index as usize] = BoardPiece {
+            //        piece_type: ChessPieces::Queens,
+            //        piece_color: start_piece.piece_color,
+            //    };
+            //}
+
+
             // do unmake move later dear fucking god.
             if moves.move_type == MoveType::Castle {
                 match start_piece.piece_color {

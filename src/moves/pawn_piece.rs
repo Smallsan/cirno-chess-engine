@@ -4,7 +4,7 @@ use crate::{types::{BoardPiece, ChessPieces, Move, MoveType, PieceColor}, chess_
  * Promotion left.
  */
 pub fn generate_pawn_moves(
-    fen_state: &ChessState,
+    en_passant_target: &Option<i16>,
     start_square: usize,
     board: &[BoardPiece; 64],
     current_player_color: &PieceColor,
@@ -82,7 +82,7 @@ if matches!(direction_offset, -7 | 7 | -9 | 9) {
         moves.push(movement);
     }
     // En passant capture
-    else if is_en_passant_capture(target_square, fen_state.en_passant_target) {
+    else if is_en_passant_capture(target_square, en_passant_target) {
         let movement = Move {
             start_square: start_square as i16,
             target_square,
@@ -94,9 +94,9 @@ if matches!(direction_offset, -7 | 7 | -9 | 9) {
     
 
 
-fn is_en_passant_capture(target_square: i16, en_passant_target: Option<i16>) -> bool {
+fn is_en_passant_capture(target_square: i16, en_passant_target: &Option<i16>) -> bool {
     match en_passant_target {
-        Some(ep_square) => target_square == ep_square,
+        Some(ep_square) => target_square == *ep_square,
         None => false,
     }
 }
